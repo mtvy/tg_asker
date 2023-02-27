@@ -7,9 +7,6 @@ from telebot.types import (
     Message, 
 )
 
-from front import *
-from setup import *
-
 import cases
 
 import dotenv, os
@@ -48,7 +45,7 @@ def start(msg: Message) -> None:
     tid = str(msg.chat.id)
     if tid in admins:
         log.info(f'Bot starting by user:{tid}.')
-        cases.sendMsg(log, bot, tid, 'Бот опросник.', set_kb(cases.DEFALTKB))
+        cases.sendMsg(log, bot, tid, 'Бот опросник.', cases.getKb(log, cases.DEFALTKB))
         return
     log.warning(f'Bot starting by user:{tid} without access.')
     noAccess(bot, tid)
