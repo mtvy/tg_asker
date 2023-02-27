@@ -1,0 +1,5 @@
+# exclude macOS dir files
+*.DS_Store
+__pycache__
+.vscode
+.env
