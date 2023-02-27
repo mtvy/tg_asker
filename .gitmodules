@@ -1,0 +1,3 @@
+[submodule "cases/db/grpc_py_database_accessing"]
+	path = cases/db/grpc_py_database_accessing
+	url = https://github.com/mtvy/grpc_py_database_accessing.git

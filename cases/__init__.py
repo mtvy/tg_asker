@@ -4,6 +4,8 @@ from .utils.msg import (
 )
 from .cases import (
     addBtn,
+    addChat,
+    addAsk,
 
     DEFALTKB,
 )

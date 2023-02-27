@@ -7,7 +7,6 @@ from telebot.types import (
     Message, 
 )
 
-from back  import *
 from front import *
 from setup import *
 
@@ -36,9 +35,9 @@ menuFuncs = {
     'Остановить'   : ...,
 }
 
-addFunc = {
-    'Канал/Чат': ...,
-    'Опрос'    : ...,
+addFuncs = {
+    'Канал/Чат': cases.addChat,
+    'Опрос'    : cases.addAsk,
 }
 
 def noAccess(bot: TeleBot, tid: str | int) -> None:
@@ -64,12 +63,15 @@ def menu(msg : Message) -> None:
 
     if tid in admins:
         if txt in menuFuncs.keys():
-            log.info(f'Bot run func:{menuFuncs[txt]} by user:{tid}.')
+            log.info(f'func:{menuFuncs[txt]} by user:{tid}.')
             menuFuncs[txt](log, bot, tid)
+        elif txt in addFuncs.keys():
+            log.info(f'func:{addFuncs[txt]} by user:{tid}.')
+            addFuncs[txt](log, bot, tid)
         else:
-            log.warning(f'Bot can not find func to run txt:{txt}.')
+            log.warning(f"Wrong txt:'{txt}'.")
     else:
-        log.warning(f'Bot get message from user:{tid} without access.')
+        log.warning(f'Msg from user:{tid} without access.')
         noAccess(bot, tid)
 
     # if tid in admins and txt in menuFuncs.keys():
@@ -117,7 +119,7 @@ def menu(msg : Message) -> None:
 
 if __name__ == "__main__":
     try:
-        log.info('Bot Start')
+        log.info('Starting...')
         bot.polling(allowed_updates="chat_member")
     except Exception as err:
-        log.error(f'Get {err} while bot polling. {tb.format_exc()}')
+        log.error(f'Get polling error.\n\n{err}\n\n{tb.format_exc()}')
