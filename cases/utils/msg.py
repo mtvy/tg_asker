@@ -1,10 +1,13 @@
 from typing import (
     Callable,
     List,
+    Dict,
 )
 from telebot.types import (
-    ReplyKeyboardMarkup as replyKb,
-    KeyboardButton as KbButton,
+    InlineKeyboardMarkup as inlineKb,
+    InlineKeyboardButton as inlineButton,
+    ReplyKeyboardMarkup  as replyKb,
+    KeyboardButton       as KbButton,
     Message,
 )
 from telebot import TeleBot
@@ -72,11 +75,24 @@ def sendMsg(log, bot: TeleBot, tid: str|int, txt: str, mrkp=None) -> Message:
         return bot.send_message(tid, txt, reply_markup=mrkp)
     except Exception as err:
         log.error(f'{err}')
-    return Message()
+    return None
+
+def delMsg(log, bot: TeleBot, cid: str|int, mid: int) -> bool:
+    try:
+        return bot.delete_message(cid, mid)
+    except Exception as err:
+        log.error(f'{err}')
+    return False
 
                       
 def getKb(log, btns: List[str]) -> replyKb:
-    log.debug(f'Get KeyboardButton:{btns}')
+    log.debug(f'Get KeyboardButtons:{btns}')
     key = replyKb(resize_keyboard=True)
     key.add(*(KbButton(txt) for txt in btns))
+    return key
+
+def getIKb(log, btns: Dict[str, str]) -> inlineKb:
+    log.debug(f'Get InlineButtons:{btns}')
+    key = inlineKb(row_width=2)
+    key.add(*(inlineButton(txt, callback_data=btns[txt]) for txt in btns.keys()))
     return key
