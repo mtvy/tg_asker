@@ -1,0 +1,239 @@
+
+1)
+        Table Id:2
+        Ask Id:1
+        Message Id:37
+        Ask Result:
+                    Subject: Тема1
+                    Number of votes:0
+                    Peoples Id:[]
+            
+                    Subject: Тема2
+                    Number of votes:0
+                    Peoples Id:[]
+            
+        Is Active:False
+        Chat TG Id:1803641130
+        Chat Name:testGroup764
+        
+2)
+        Table Id:1
+        Ask Id:1
+        Message Id:37
+        Ask Result:
+                    Subject: Тема1
+                    Number of votes:1
+                    Peoples Id:[281321076]
+            
+                    Subject: Тема2
+                    Number of votes:0
+                    Peoples Id:[]
+            
+        Is Active:False
+        Chat TG Id:1669169522
+        Chat Name:bot_testing132
+        
+11)
+        Table Id:8
+        Ask Id:1
+        Message Id:41
+        Ask Result:
+                    Subject: Тема1
+                    Number of votes:0
+                    Peoples Id:[]
+            
+                    Subject: Тема2
+                    Number of votes:1
+                    Peoples Id:[281321076]
+            
+        Is Active:False
+        Chat TG Id:1669169522
+        Chat Name:bot_testing132
+        
+12)
+        Table Id:12
+        Ask Id:1
+        Message Id:41
+        Ask Result:
+                    Subject: Тема1
+                    Number of votes:0
+                    Peoples Id:[]
+            
+                    Subject: Тема2
+                    Number of votes:0
+                    Peoples Id:[]
+            
+        Is Active:True
+        Chat TG Id:1803641130
+        Chat Name:testGroup764
+        
+13)
+        Table Id:13
+        Ask Id:1
+        Message Id:42
+        Ask Result:
+                    Subject: Тема1
+                    Number of votes:0
+                    Peoples Id:[]
+            
+                    Subject: Тема2
+                    Number of votes:0
+                    Peoples Id:[]
+            
+        Is Active:True
+        Chat TG Id:1803641130
+        Chat Name:testGroup764
+        
+14)
+        Table Id:14
+        Ask Id:1
+        Message Id:45
+        Ask Result:
+                    Subject: Тема1
+                    Number of votes:0
+                    Peoples Id:[]
+            
+                    Subject: Тема2
+                    Number of votes:0
+                    Peoples Id:[]
+            
+        Is Active:True
+        Chat TG Id:1803641130
+        Chat Name:testGroup764
+        
+3)
+        Table Id:4
+        Ask Id:1
+        Message Id:39
+        Ask Result:
+                    Subject: Тема1
+                    Number of votes:2
+                    Peoples Id:[281321076, 5472647497]
+            
+                    Subject: Тема2
+                    Number of votes:0
+                    Peoples Id:[]
+            
+        Is Active:True
+        Chat TG Id:1669169522
+        Chat Name:bot_testing132
+        
+4)
+        Table Id:3
+        Ask Id:1
+        Message Id:38
+        Ask Result:
+                    Subject: Тема1
+                    Number of votes:0
+                    Peoples Id:[]
+            
+                    Subject: Тема2
+                    Number of votes:2
+                    Peoples Id:[281321076, 5472647497]
+            
+        Is Active:False
+        Chat TG Id:1669169522
+        Chat Name:bot_testing132
+        
+5)
+        Table Id:5
+        Ask Id:1
+        Message Id:40
+        Ask Result:
+                    Subject: Тема1
+                    Number of votes:1
+                    Peoples Id:[281321076]
+            
+                    Subject: Тема2
+                    Number of votes:0
+                    Peoples Id:[]
+            
+        Is Active:False
+        Chat TG Id:1669169522
+        Chat Name:bot_testing132
+        
+6)
+        Table Id:7
+        Ask Id:1
+        Message Id:39
+        Ask Result:
+                    Subject: Тема1
+                    Number of votes:0
+                    Peoples Id:[]
+            
+                    Subject: Тема2
+                    Number of votes:0
+                    Peoples Id:[]
+            
+        Is Active:False
+        Chat TG Id:1803641130
+        Chat Name:testGroup764
+        
+7)
+        Table Id:6
+        Ask Id:1
+        Message Id:38
+        Ask Result:
+                    Subject: Тема1
+                    Number of votes:0
+                    Peoples Id:[]
+            
+                    Subject: Тема2
+                    Number of votes:0
+                    Peoples Id:[]
+            
+        Is Active:False
+        Chat TG Id:1803641130
+        Chat Name:testGroup764
+        
+8)
+        Table Id:9
+        Ask Id:1
+        Message Id:42
+        Ask Result:
+                    Subject: Тема1
+                    Number of votes:0
+                    Peoples Id:[]
+            
+                    Subject: Тема2
+                    Number of votes:0
+                    Peoples Id:[]
+            
+        Is Active:False
+        Chat TG Id:1669169522
+        Chat Name:bot_testing132
+        
+9)
+        Table Id:10
+        Ask Id:1
+        Message Id:43
+        Ask Result:
+                    Subject: Тема1
+                    Number of votes:0
+                    Peoples Id:[]
+            
+                    Subject: Тема2
+                    Number of votes:0
+                    Peoples Id:[]
+            
+        Is Active:False
+        Chat TG Id:1669169522
+        Chat Name:bot_testing132
+        
+10)
+        Table Id:11
+        Ask Id:1
+        Message Id:40
+        Ask Result:
+                    Subject: Тема1
+                    Number of votes:0
+                    Peoples Id:[]
+            
+                    Subject: Тема2
+                    Number of votes:0
+                    Peoples Id:[]
+            
+        Is Active:True
+        Chat TG Id:1803641130
+        Chat Name:testGroup764
+        

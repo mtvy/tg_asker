@@ -10,7 +10,7 @@ from telebot.types import (
 import cases
 
 import dotenv, os, json
-import exclog, logger, traceback as tb
+import logger, traceback as tb
 
 dotenv.load_dotenv('.env')
 
@@ -20,10 +20,13 @@ token = os.getenv('TOKEN')
 admins = os.getenv('ADMINS')
 dev = os.getenv('DEV')
 
+photo = open(os.path.join('img', 'ask.png'), 'rb').read()
+
 log.info(f'Token:{token}')
 log.info(f'Admins:{admins}')
 
 bot = TeleBot(token)
+
 
 name = 'scanner'
 api_id = 23454228
@@ -67,10 +70,9 @@ def start(msg: Message) -> None:
 
 
 @bot.message_handler(content_types=['text'])
-def menu(msg : Message) -> None:
-    tid = str(msg.chat.id)
-    # u_id = str(msg.from_user.id)
+def menu(msg: Message) -> None:
     
+    tid = str(msg.chat.id)
     txt = msg.text
 
     if tid in admins:
@@ -94,7 +96,7 @@ def menu(msg : Message) -> None:
                 log.warning(f'Empty aid:{txt}')
                 cases.sendMsg(log, bot, tid, 'Ошибка.', cases.getKb(log, cases.DEFALTKB))
                 return
-            cases.sendBtnChat(log, bot, tid, txt)
+            cases.sendBtnChat(log, bot, tid, txt, photo)
         else:
             log.warning(f"Wrong txt:'{txt}'.")
             cases.sendMsg(log, bot, tid, 'Функция не найдена!', cases.getKb(log, cases.DEFALTKB))
@@ -102,30 +104,9 @@ def menu(msg : Message) -> None:
         log.warning(f'Msg from user:{tid} without access.')
         noAccess(bot, tid)
 
-# @bot.message_handler(content_types=["new_chat_members"])
-# def new_group_user(msg: Message):
-#     tid = str(msg.chat.id)
-
-#     group: Tuple = get_info(_id)
-
-#     if group:
-#         u_id = str(msg.from_user.id)
-        
-#         txt: str = group[1] 
-#         f_name: str = msg.from_user.first_name
-#         l_name: str = msg.from_user.last_name
-#         u_name: str = msg.from_user.username
-
-#         if '@user' in txt:
-#             txt = txt.replace('@user', f_name if f_name else l_name \
-#                     if l_name else u_name if u_name else '')
-        
-#         msg = cases.sendMsg(log, bot, _id, txt, set_inline_kb({'Подтвердить' : u_id}))
-#         users_sub[_id] = {u_id : [False, msg.message_id, False]}
-
 
 @bot.callback_query_handler(func=lambda call: True)
-def callback_inline(call : CallbackQuery):
+def callback_inline(call: CallbackQuery):
 
     cid = call.message.chat.id
     uid = call.from_user.id
@@ -144,7 +125,7 @@ def callback_inline(call : CallbackQuery):
     # tid = str(cid).replace('-100', '')
 
     col = 'active_tb.id as actid, active_tb.cid, active_tb.aid, active_tb.mid, active_tb.res, active_tb.stat, chat_tb.tid, chat_tb.chat'
-    cond = f'where mid={mid} and cid={chat_id} and stat=true'
+    cond = f'where active_tb.mid={mid} and active_tb.cid={chat_id} and active_tb.stat=true'
     data, stat = cases.db.get(col, 'active_tb join chat_tb on active_tb.cid = chat_tb.id', cond)
     if stat != 'ok':
         log.error(stat)

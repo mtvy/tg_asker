@@ -1,9 +1,14 @@
 from .utils import (
+    sendPhoto,
+    sendDoc,
     waitMsg,
     sendMsg,
     delMsg,
+    
     getIKb,
     getKb,
+
+    saveTxt,
 )
 from .db import (
     db,
