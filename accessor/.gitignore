@@ -1,0 +1,8 @@
+database_grpc.pb.go
+database.pb.go
+main
+test.log
+*.out
+*.test
+.DS_Store
+pgdata

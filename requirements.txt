@@ -1,0 +1,8 @@
+pyTelegramBotAPI==4.7.0
+python-dotenv==0.21.0
+grpcio-tools==1.51.1
+coloredlogs==15.0.1
+Telethon==1.26.1
+grpcio==1.51.1
+pylint==2.17.0
+radon==5.1.0

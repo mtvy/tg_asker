@@ -17,8 +17,8 @@ create table ask_tb (
 
 create table active_tb (
     id serial primary key,
-    cid integer REFERENCES chat_tb(id),
-    aid integer REFERENCES ask_tb(id),
+    cid integer REFERENCES chat_tb(id) on delete cascade on update cascade,
+    aid integer REFERENCES ask_tb(id) on delete cascade on update cascade,
     mid integer,
     res jsonb,
     stat boolean,

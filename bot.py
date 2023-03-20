@@ -56,14 +56,14 @@ delFuncs = {
 }
 
 def noAccess(bot: TeleBot, tid: str | int) -> None:
-    cases.sendMsg(log, bot, tid, 'Нет доступа.', rmvKb())
+    cases.send_msg(log, bot, tid, 'Нет доступа.', rmvKb())
 
 @bot.message_handler(commands=['start'])
 def start(msg: Message) -> None:
     tid = str(msg.chat.id)
     if tid in admins:
         log.info(f'Bot starting by user:{tid}.')
-        cases.sendMsg(log, bot, tid, 'Бот опросник.', cases.getKb(log, cases.DEFALTKB))
+        cases.send_msg(log, bot, tid, 'Бот опросник.', cases.get_kb(log, cases.DEFALTKB))
         return
     log.warning(f'Bot starting by user:{tid} without access.')
     noAccess(bot, tid)
@@ -94,12 +94,12 @@ def menu(msg: Message) -> None:
             txt = txt.replace('Опрос ', '')
             if not txt.isdigit():
                 log.warning(f'Empty aid:{txt}')
-                cases.sendMsg(log, bot, tid, 'Ошибка.', cases.getKb(log, cases.DEFALTKB))
+                cases.send_msg(log, bot, tid, 'Ошибка.', cases.get_kb(log, cases.DEFALTKB))
                 return
             cases.sendBtnChat(log, bot, tid, txt, photo)
         else:
             log.warning(f"Wrong txt:'{txt}'.")
-            cases.sendMsg(log, bot, tid, 'Функция не найдена!', cases.getKb(log, cases.DEFALTKB))
+            cases.send_msg(log, bot, tid, 'Функция не найдена!', cases.get_kb(log, cases.DEFALTKB))
     else:
         log.warning(f'Msg from user:{tid} without access.')
         noAccess(bot, tid)
@@ -129,11 +129,11 @@ def callback_inline(call: CallbackQuery):
     data, stat = cases.db.get(col, 'active_tb join chat_tb on active_tb.cid = chat_tb.id', cond)
     if stat != 'ok':
         log.error(stat)
-        cases.sendMsg(log, bot, dev, cases.DBERR)
+        cases.send_msg(log, bot, dev, cases.DBERR)
         return
     log.debug(data)
     if not len(data) or not len(data['0']):
-        log.warning(f'Asker is not at the table. Delete:{cases.delMsg(log, bot, cid, mid)}')
+        log.warning(f'Asker is not at the table. Delete:{cases.del_msg(log, bot, cid, mid)}')
         return
 
     jsonb = data['0'][4]

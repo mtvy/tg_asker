@@ -1,0 +1,5 @@
+port: "0.0.0.0:8080"
+port_pprof: "0.0.0.0:8024"
+dbhost: "postgres://postgres:postgres@postgres:5433/postgres"
+prometheus: "0.0.0.0:9091"
+loki: "loki:3100"

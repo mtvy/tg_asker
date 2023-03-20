@@ -1,0 +1,20 @@
+version: "3.3"
+
+services:
+  tg_asker:
+    container_name: tg_asker
+    hostname: tg_asker
+    build: ../
+    ports:
+      - "443:443"
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options: 
+        tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
+    networks:
+      - mainnet
+
+networks:
+  mainnet:
+    external: true

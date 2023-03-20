@@ -1,14 +1,14 @@
 from .utils import (
-    sendPhoto,
-    sendDoc,
-    waitMsg,
-    sendMsg,
-    delMsg,
+    send_photo,
+    send_doc,
+    wait_msg,
+    send_msg,
+    del_msg,
     
-    getIKb,
-    getKb,
+    get_ikb,
+    get_kb,
 
-    saveTxt,
+    save_txt,
 )
 from .db import (
     db,

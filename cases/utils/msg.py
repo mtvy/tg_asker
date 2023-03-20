@@ -1,3 +1,4 @@
+import io
 from typing import (
     Callable,
     List,
@@ -12,10 +13,8 @@ from telebot.types import (
 )
 from telebot import TeleBot
 
-import io
 
-
-def waitMsg(log, bot: TeleBot, tid: str|int, func: Callable, txt: str, mrkp=None, args=[]) -> None:
+def wait_msg(log, bot: TeleBot, tid: str|int, func: Callable, txt: str, mrkp=None, args=[]) -> None:
     """
     Replacement for register_next_step_handler.
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -46,7 +45,7 @@ def waitMsg(log, bot: TeleBot, tid: str|int, func: Callable, txt: str, mrkp=None
         log.error(f'{err}')
 
 
-def sendMsg(log, bot: TeleBot, tid: str|int, txt: str, mrkp=None) -> Message:
+def send_msg(log, bot: TeleBot, tid: str|int, txt: str, mrkp=None) -> Message:
     """
     Replacement for send_message.
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -80,14 +79,14 @@ def sendMsg(log, bot: TeleBot, tid: str|int, txt: str, mrkp=None) -> Message:
         log.error(f'{err}')
     return None
 
-def delMsg(log, bot: TeleBot, cid: str|int, mid: int) -> bool:
+def del_msg(log, bot: TeleBot, cid: str|int, mid: int) -> bool:
     try:
         return bot.delete_message(cid, mid)
     except Exception as err:
         log.error(f'{err}')
     return False
 
-def sendDoc(log, bot: TeleBot, tid: str|int, txt: str, doc: str, mrkp=None) -> Message:
+def send_doc(log, bot: TeleBot, tid: str|int, txt: str, doc: str, mrkp=None) -> Message:
     try:
         log.debug(f"Doc:'{doc}' Msg:'{txt}' Dest:{tid}")
         return bot.send_document(tid, io.open(doc), caption=txt, reply_markup=mrkp)
@@ -95,7 +94,7 @@ def sendDoc(log, bot: TeleBot, tid: str|int, txt: str, doc: str, mrkp=None) -> M
         log.error(f'{err}')
     return None
 
-def sendPhoto(log, bot: TeleBot, tid: str|int, txt: str, photo: bytes, mrkp=None) -> Message:
+def send_photo(log, bot: TeleBot, tid: str|int, txt: str, photo: bytes, mrkp=None) -> Message:
     try:
         log.debug(f"Photo:'{photo}' Msg:'{txt}' Dest:{tid}")
         return bot.send_photo(tid, photo, txt, reply_markup=mrkp)
@@ -104,17 +103,17 @@ def sendPhoto(log, bot: TeleBot, tid: str|int, txt: str, photo: bytes, mrkp=None
     return None
 
                       
-def getKb(log, btns: List[str]) -> replyKb:
+def get_kb(log, btns: List[str]) -> replyKb:
     log.debug(f'Get KeyboardButtons:{btns}')
     key = replyKb(resize_keyboard=True)
     key.add(*(KbButton(txt) for txt in btns))
     return key
 
-def getIKb(log, btns: Dict[str, str]) -> inlineKb:
+def get_ikb(log, btns: Dict[str, str]) -> inlineKb:
     log.debug(f'Get InlineButtons:{btns}')
     key = inlineKb(row_width=2)
     key.add(*(inlineButton(txt, callback_data=btns[txt]) for txt in btns.keys()))
     return key
 
-def saveTxt(txt: str, file: str, mode='a', enc='utf-8') -> int:
+def save_txt(txt: str, file: str, mode='a', enc='utf-8') -> int:
     return open(file=file, mode=mode, encoding=enc).write(txt)

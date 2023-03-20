@@ -1,12 +1,12 @@
 from .msg import (
-    sendPhoto,
-    sendDoc,
-    sendMsg,
-    waitMsg,
-    delMsg,
+    send_photo,
+    send_doc,
+    send_msg,
+    wait_msg,
+    del_msg,
     
-    getIKb,
-    getKb,
+    get_ikb,
+    get_kb,
 
-    saveTxt,
+    save_txt,
 )

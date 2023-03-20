@@ -1,0 +1,57 @@
+syntax = "proto3";
+
+package api;
+
+option go_package = "./api/grpc";
+
+service Database {
+    rpc GetDb    (GetDbRequest)    returns (GetDbResponse)    {}
+    rpc InsertDb (InsertDbRequest) returns (InsertDbResponse) {}
+    rpc DeleteDb (DeleteDbRequest) returns (DeleteDbResponse) {}
+    rpc UpdateDb (UpdateDbRequest) returns (UpdateDbResponse) {}
+}
+
+message GetDbRequest {
+    string columns = 1;
+    string table = 2;
+    string condition = 3;
+    string db_host = 4;
+
+}
+
+message GetDbResponse {
+    string status = 1;
+    bytes data = 2;
+}
+
+message InsertDbRequest {
+    string table = 1;
+    string columns = 2;
+    string values = 3;
+    string db_host = 4;
+}
+
+message InsertDbResponse {
+    string status = 1;
+}
+
+message DeleteDbRequest {
+    string table = 1;
+    string condition = 2;
+    string db_host = 3;
+}
+
+message DeleteDbResponse {
+    string status = 1;
+}
+
+message UpdateDbRequest {
+    string table = 1;
+    string to_set = 2;
+    string condition = 3;
+    string db_host = 4;
+}
+
+message UpdateDbResponse {
+    string status = 1;
+} 
