@@ -55,6 +55,12 @@ delFuncs = {
     'Удалить канал/чат': cases.delChat,
 }
 
+defaultFunc = {
+    'Конфигуратор': ...,
+    'Вывод информации': ...,
+    'Управление опросами': ...,
+}
+
 def noAccess(bot: TeleBot, tid: str | int) -> None:
     cases.send_msg(log, bot, tid, 'Нет доступа.', rmvKb())
 
@@ -63,6 +69,7 @@ def start(msg: Message) -> None:
     tid = str(msg.chat.id)
     if tid in admins:
         log.info(f'Bot starting by user:{tid}.')
+
         cases.send_msg(log, bot, tid, 'Бот опросник.', cases.get_kb(log, cases.DEFALTKB))
         return
     log.warning(f'Bot starting by user:{tid} without access.')

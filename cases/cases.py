@@ -24,7 +24,8 @@ import asyncio, json, os
 
 TGLINK = 'https://t.me/'
 ADDKB = ['Канал/Чат', 'Опрос']
-DEFALTKB = ['Отправить', 'Добавить', 'Удалить', 'Показать', 'Остановить']
+# DEFALTKB = ['Отправить', 'Добавить', 'Удалить', 'Показать', 'Остановить']
+DEFALTKB = ['Конфигуратор', 'Вывод информации', 'Управление опросами']
 SHOWKB = ['Опросы', 'Каналы/Чаты', 'Результаты']
 DELKB = ['Удалить опросы', 'Удалить канал/чат']
 
@@ -60,10 +61,49 @@ def addBtn(log, bot: TeleBot, tid: str|int) -> None:
     send_msg(log, bot, tid, 'Что добавить?', get_kb(log, ADDKB))
 
 
+def add_ask_step_conf(log, bot: TeleBot, tid: str|int) -> None:
+    def _add_sub(msg: Message, log, bot: TeleBot, tid: str|int, txt: str) -> None:
+        # txt = f'{HEAD}{msg.text}'
+
+    def _add(msg: Message, log, bot: TeleBot, tid: str|int) -> None:
+        txt = ...
+        wait_msg(log, bot, tid, _add_sub, 'Введите ответ.', rmvKb(), [log, bot, tid, txt])
+
+        txt = msg.text.replace('\n', '')
+        log.debug(f"Ask:'{txt}'.")
+        head_ind = txt.find(HEAD)
+        sub_ind = txt.find(SUB)
+        log.debug(f'head_ind:{head_ind}, sub_ind:{sub_ind}')
+        if -1 in (head_ind, sub_ind):
+            log.debug(f"Wrong ask:'{txt}' format.")
+            send_msg(log, bot, tid, f'Неправильный формат опроса ({ASKEXAMPLE})', get_kb(log, DEFALTKB))
+            return
+        
+        req = f"('{txt[txt.find(HEAD)+3:txt.find(SUB)]}', array["
+        for i in txt[txt.find(SUB):].split(SUB):
+            if not i:
+                continue
+            req = f"{req}'{i[1:]}',"
+        req = f'{req[:-1]}])'
+        
+        log.info(f"insert:'{req}'")
+
+        # TODO: Exist check
+        
+        if (stat := db.insert('ask_tb', 'head, sub', req).status) != 'ok':
+            log.error(stat)
+            send_msg(log, bot, tid, DBERR, rmvKb())
+            return
+        send_msg(log, bot, tid, 'Сохранено.', get_kb(log, DEFALTKB))
+    
+    log.debug(f'add_ask_step_conf user:{tid}')
+    wait_msg(log, bot, tid, _add, f'Введите вопрос опроса.', rmvKb(), [log, bot, tid])
+
 def addAsk(log, bot: TeleBot, tid: str|int) -> None:
     def _add(msg: Message, log, bot: TeleBot, tid: str|int) -> None:
         txt = msg.text.replace('\n', '')
-        log.debug(f"Ask:'{txt}'.")
+        log.debug(f"HEAD:'{txt}'.")
+        
         head_ind = txt.find(HEAD)
         sub_ind = txt.find(SUB)
         log.debug(f'head_ind:{head_ind}, sub_ind:{sub_ind}')
