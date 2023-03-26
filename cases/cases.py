@@ -19,13 +19,14 @@ from telebot.types import (
 from telethon import (
     TelegramClient,
 )
+from typing import List, Tuple
 from telebot import TeleBot
-import asyncio, json, os
+import asyncio, json, os, emoji
 
 TGLINK = 'https://t.me/'
 ADDKB = ['Канал/Чат', 'Опрос']
 # DEFALTKB = ['Отправить', 'Добавить', 'Удалить', 'Показать', 'Остановить']
-DEFALTKB = ['Конфигуратор', 'Вывод информации', 'Управление опросами']
+DEFALTKB = ['Отправить', 'Опросы']
 SHOWKB = ['Опросы', 'Каналы/Чаты', 'Результаты']
 DELKB = ['Удалить опросы', 'Удалить канал/чат']
 
@@ -55,6 +56,215 @@ active_tb = """
     active_tb join chat_tb on active_tb.cid = chat_tb.id
 """
 
+SENDFLAG = "SENDF"
+STOPFLAG = "STOPF"
+DELFLAG = "DELF"
+RESFLAG = "RESF"
+
+def get_asks(log, bot: TeleBot, tid: str|int) -> None:
+    data, stat = db.get('*', 'ask_tb', '')
+    if stat != 'ok':
+        log.error(f'stat:{stat} data:{data}')
+        send_msg(log, bot, tid, DBERR, get_kb(log, DEFALTKB))
+        return
+    if not len(data):
+        send_msg(log, bot, tid, 'Нет опросов для отправки.', get_kb(log, DEFALTKB))
+        # create_ask(log, bot, tid)
+        return
+    
+    send_msg(log, bot, tid, f'Всего опросов: {len(data)}', rmvKb())
+    asks = formatListedAsk(data)
+    for key, ask in zip(data.keys(), asks):
+        if data[key][5]:
+            send_msg(log, bot, tid, ask, get_ikb(log, 
+                {
+                    'Отправить': f'{SENDFLAG}{data[key][0]}',
+                    # 'Остановить': f'{STOPFLAG}{data[key][0]}',
+                    'Удалить': f'{DELFLAG}{data[key][0]}',
+                    # 'Результаты': f'{RESFLAG}{data[key][0]}',
+                }
+            ))
+        else:
+            send_msg(log, bot, tid, ask, get_ikb(log, 
+                {
+                    'Отправить': f'{SENDFLAG}{data[key][0]}',
+                    'Удалить': f'{DELFLAG}{data[key][0]}',
+                    # 'Результаты': f'{RESFLAG}{data[key][0]}',
+                }
+            ))
+    
+    send_msg(log, bot, tid, f'Все опросы', get_kb(log, DEFALTKB))
+
+def push(log, bot: TeleBot, tid: str|int, cid, adata, photo: bytes, chat) -> None:
+    log.debug(adata)
+    log.debug(cid)
+    if not len(adata) or not len(adata['0']):
+        log.debug(f'Empty or wrong adata:{adata}')
+        send_msg(log, bot, tid, 'Не найден id.', get_kb(log, DEFALTKB))
+        return
+        
+    atitle = adata['0'][1]
+    log.debug(atitle)
+    abtns, jsonb = dict(), dict()
+    for i in adata['0'][2]['Elements']:
+        abtns[i] = f"{adata['0'][0]}{ASKER}{i}"
+        jsonb[i] = [0, []]
+    
+    log.debug(abtns)
+    jsonb = json.dumps(jsonb)
+    log.debug(jsonb)
+    asks = 'Нет данных по опросам' if not len(adata) else formatAsk(adata)
+    chats = chat.username
+
+    votes = []; svotes = 0
+
+    if adata['0'][4]:
+        for _, r in adata['0'][4].items():
+            svotes += r[0]
+            votes.append(r[0])
+        
+        v = 0
+        for k, r in adata['0'][4].items():
+            log.debug(f"votes[{v}]:{votes[v]} svotes:{svotes}  %:{0 if not svotes else (votes[v]/svotes) * 100}")
+            atitle = f"""{atitle}\n\n{k}\n{emoji.emojize(":white_small_square:")} {0 if not svotes else (votes[v]/svotes) * 100}%
+            """
+            v+=1
+    send_msg(log, bot, tid, f'Отправленный опрос:\n{asks}\n\nКанал/чат: {chats}\n\nВопрос: {atitle}\nОтветы:\n{list(abtns.keys())}', get_kb(log, DEFALTKB))
+    msg = send_photo(log, bot, f'-100{cid}', atitle, photo, get_ikb(log, abtns))
+    log.debug(msg)
+    if msg is None or not hasattr(msg, 'message_id'):
+        log.error(f'Wrong msg:{msg}')
+        send_msg(log, bot, tid, 'Ошибка отправки. К опросу нет доступа!', get_kb(log, DEFALTKB))
+        return
+        
+    mid = msg.message_id
+
+    if not adata['0'][3]:
+        if (stat := db.update('ask_tb', f"cid=array[{cid}], res='{jsonb}', stat=TRUE", f"where id={adata['0'][0]}").status) != 'ok':
+            log.error(stat)
+            send_msg(log, bot, tid, 'Ошибка сохранения. К опросу нет доступа!', get_kb(log, DEFALTKB))
+            return
+    # elif adata['0'][3] and not 
+    else:
+        req = 'array['
+        for i in adata['0'][3]['Elements']:
+            req = f"{req}{i}, "
+        req = f'{req}{cid}]'
+        log.debug(req)
+        if (stat := db.update('ask_tb', f"cid={req}", f"where id={adata['0'][0]}").status) != 'ok':
+            log.error(stat)
+            send_msg(log, bot, tid, DBERR, get_kb(log, DEFALTKB))
+            return
+
+        
+
+def create_ask(log, bot: TeleBot, tid: str|int) -> None:
+    def _loop_create(msg: Message, title: str, asks: List[str]) -> None:
+        log.debug(f'txt:{msg.text} title:{title} asks:{asks}')
+        if msg.text == 'Назад':
+            send_msg(log, bot, tid, 'Отмена создания опроса', get_kb(log, DEFALTKB))
+            return
+        if msg.text == 'Завершить':
+            send_msg(log, bot, tid, 'Опрос создан', get_kb(log, DEFALTKB))
+            req = f"('{title}', array["
+            for i in asks:
+                req = f"{req}'{i}',"
+            req = f'{req[:-1]}])'
+            
+            log.info(f"insert:'{req}'")
+            if (stat := db.insert('ask_tb', 'head, sub', req).status) != 'ok':
+                log.error(stat)
+                send_msg(log, bot, tid, DBERR, rmvKb())
+                return
+            send(log, bot, tid)
+            return
+
+        asks.append(msg.text)
+        wait_msg(log, bot, tid, _loop_create, 'Введите вариант ответа', get_kb(log, ['Назад', 'Завершить']), [title, asks])
+
+        
+    def _create(msg: Message) -> None:
+        log.debug(msg.text)
+        if msg.text == 'Назад':
+            send_msg(log, bot, tid, 'Отмена создания опроса', get_kb(log, DEFALTKB))
+            return
+        
+        wait_msg(log, bot, tid, _loop_create, 'Введите вариант ответа', get_kb(log, ['Назад']), [msg.text, []])
+
+
+
+    wait_msg(log, bot, tid, _create, 'Введите вопрос', get_kb(log, ['Назад']), [])
+
+def send(log, bot: TeleBot, tid: str|int) -> None:
+    data, stat = db.get('*', 'ask_tb', '')
+    if stat != 'ok':
+        log.error(f'stat:{stat} data:{data}')
+        send_msg(log, bot, tid, DBERR, get_kb(log, DEFALTKB))
+        return
+    if not len(data):
+        send_msg(log, bot, tid, 'Нет опросов для отправки. Переходим к созданию.', get_kb(log, ['Назад']))
+        create_ask(log, bot, tid)
+        return
+    
+    send_msg(log, bot, tid, f'Всего опросов: {len(data)}', rmvKb())
+    asks = formatListedAsk(data)
+    for key, ask in zip(data.keys(), asks):
+        send_msg(log, bot, tid, ask, get_ikb(log, {'Отправить': f'{SENDFLAG}{data[key][0]}'}))
+    
+    send_msg(log, bot, tid, f'Какой отправить?', get_kb(log, ['Создать новый опрос', 'Назад']))
+    
+
+def redirect(log, bot: TeleBot, tid: str|int, dev: str|int, aid: str, cid: str|int, name, api_id, api_hash, photo) -> None:
+    
+    async def _getEntity(link):
+        try:
+            log.info(f'Start cli as [{bot.token}]')
+            log.info("Get client")
+            client = TelegramClient(name, api_id, api_hash)
+            await client.start(bot_token=bot.token)
+            chat = await client.get_entity(link)
+            await client.disconnect()
+            return chat
+        except Exception as err:
+            log.error(err)
+        return None
+    
+    def _redirect(msg: Message, log, bot: TeleBot, tid: str|int, cid: str, data: str) -> None:
+        txt = msg.text
+        log.info(f'Redirecting by tid:{tid} with data:{data} link:{txt} to cid:{cid}')
+        if TGLINK not in txt:
+            log.debug(f"Wrong link:'{txt}' format.")
+            send_msg(log, bot, tid, f'Неправильный формат ссылки ({TGLINK})', get_kb(log, DEFALTKB))
+            return
+        loop = asyncio.new_event_loop()
+        task = loop.create_task(_getEntity(txt))
+
+        loop.run_until_complete(task)
+
+        chat = task.result()
+        log.debug(chat)
+
+        if not hasattr(chat, 'id'):
+            log.debug(f'No id chat:{chat}')
+            send_msg(log, bot, tid, f'Ошибка получения данных о канале/чате.', get_kb(log, DEFALTKB))
+            return
+
+        push(log, bot, tid, chat.id, data, photo, chat)
+        # send_msg(bot, log, chat.id, )
+
+
+    data, stat = db.get('*', 'ask_tb', f'where id={aid}')
+    if stat != 'ok':
+        log.error(f'stat:{stat} data:{data}')
+        send_msg(log, bot, dev, DBERR, get_kb(log, DEFALTKB))
+        return
+    if not len(data):
+        log.info(f'data len:0')
+        send_msg(log, bot, tid, 'Ошибка получения опроса.', rmvKb())
+        return
+
+    wait_msg(log, bot, tid, _redirect, 'Введите ссылку на канал/чат.', rmvKb(), [log, bot, tid, cid, data])
+
 
 def addBtn(log, bot: TeleBot, tid: str|int) -> None:
     log.debug(f'addBtn user:{tid}')
@@ -64,6 +274,7 @@ def addBtn(log, bot: TeleBot, tid: str|int) -> None:
 def add_ask_step_conf(log, bot: TeleBot, tid: str|int) -> None:
     def _add_sub(msg: Message, log, bot: TeleBot, tid: str|int, txt: str) -> None:
         # txt = f'{HEAD}{msg.text}'
+        ...
 
     def _add(msg: Message, log, bot: TeleBot, tid: str|int) -> None:
         txt = ...
@@ -181,6 +392,49 @@ def showBtn(log, bot: TeleBot, tid: str|int) -> None:
     log.debug(f'showBtn user:{tid}')
     send_msg(log, bot, tid, 'Что нужно открыть?', get_kb(log, SHOWKB))
 
+def formatListedAsk(data) -> List[str]:
+    """  
+        id serial primary key,
+        head text, 
+        sub varchar(64)[], 
+        cid integer[],
+        res jsonb,
+        stat boolean,
+        add_date timestamp not null default now()
+    """
+    asks = []
+    for ind, ask in data.items():
+        max_votes = 0; max_votes_ask = '?'; sum_votes = 0
+        res = ''
+        if ask[4]:
+            for k, r in ask[4].items():
+                sum_votes += r[0]
+                if r[0] > max_votes:
+                    max_votes = r[0]
+                    max_votes_ask = k
+                res = f"""{res}
+                Ответ:{k} 
+                    Всего голосов:{r[0]}
+                    Проголосовали:{r[1]}
+
+                """
+            res = f"""{res}
+            Всего голосов: {sum_votes}
+            Больше всего голосов: {max_votes_ask} -> {max_votes}
+            В процентах: {0 if not sum_votes else max_votes//sum_votes * 100}%
+            """
+        asks.append(f"""
+    {int(ind)+1})
+        \tId таблицы:{ask[0]}
+        \tВопрос:{ask[1]}
+        \tОтветы:{ask[2]['Elements']}
+        \tГруппы:{ask[3] if not ask[3] else ask[3]['Elements']}
+        \tРезультат:{res}
+        \tСтатус:{ask[5]}
+        \tДата добавления:{ask[6]}\n
+        """)
+    return asks
+
 def formatAsk(data) -> str:
     """
     {'0': [
@@ -195,13 +449,35 @@ def formatAsk(data) -> str:
     ]}
     """
     asks = ''
+    max_votes = 0; max_votes_ask = ''; sum_votes = 0
+
     for ind, ask in data.items():
+        res = ''
+        if ask[4]:
+            for k, r in ask[4].items():
+                sum_votes += r[0]
+                if r[0] > max_votes:
+                    max_votes = r[0]
+                    max_votes_ask = k
+                res = f"""{res}
+                Ответ:{k} Количество голосований:{r[0]}
+                    Проголосовали:{r[1]}
+
+                """
+            res = f"""{res}
+            Всего голосов: {sum_votes}
+            Больше всего голосов: {max_votes} у {max_votes_ask}
+            В процентах: {max_votes//sum_votes * 100}
+            """
         asks = f"""{asks}
     {int(ind)+1})
         \tId таблицы:{ask[0]}
-        \tЗаглавие:{ask[1]}
-        \tТемы:{ask[2]['Elements']}
-        \tДата добавления:{ask[3]}\n
+        \tВопрос:{ask[1]}
+        \tОтветы:{ask[2]['Elements']}
+        \tГруппы:{ask[3] if not ask[3] else ask[3]['Elements']}
+        \tРезультат:{res}
+        \tСтатус:{ask[5]}
+        \tДата добавления:{ask[6]}\n
         """
     return asks
     

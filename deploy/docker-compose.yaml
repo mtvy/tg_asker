@@ -4,7 +4,10 @@ services:
   tg_asker:
     container_name: tg_asker
     hostname: tg_asker
-    build: ../
+    build:
+      context: ../
+      # args:
+        # - --no-cache
     ports:
       - "443:443"
     restart: unless-stopped

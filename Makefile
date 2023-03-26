@@ -14,6 +14,8 @@ git:
 # - - - - - - - - - - - - - - - - -
 # Deploy
 # - - - - - - - - - - - - - - - - -
+reupload: shutdown upload
+
 upload: up-serve up
 
 up-serve:
