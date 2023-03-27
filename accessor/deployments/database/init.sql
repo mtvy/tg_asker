@@ -15,6 +15,7 @@ create table ask_tb (
     cid integer[],
     res jsonb,
     stat boolean,
+    is_pub boolean,
     add_date timestamp not null default now()
 );
 

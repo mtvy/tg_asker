@@ -78,6 +78,7 @@ def callback_inline(call: CallbackQuery):
 
     cid = call.message.chat.id
     uid = call.from_user.id
+    unid = call.from_user.username
     mid = call.message.message_id
     
     data = call.data
@@ -128,12 +129,13 @@ def callback_inline(call: CallbackQuery):
             return
 
         for i in jsonb.keys():
-            if uid in jsonb[i][1]:
+            if uid in jsonb[i][1] and i != 'Результаты':
                 log.info(f'uid:{uid} was at sub:{i} val:{jsonb[i][1]}')
                 break
         else:
             val[0] += 1
             val[1].append(uid)
+            val[2].append(unid)
             if (stat := cases.db.update('ask_tb', f"res['{sub}']='{json.dumps(val)}'", f'where id={aid}').status) != 'ok':
                 log.error(stat)
                 return
@@ -152,12 +154,16 @@ def callback_inline(call: CallbackQuery):
             atitle = adata['0'][1]
             votes = []; svotes = 0
             if adata['0'][4]:
-                for _, r in adata['0'][4].items():
+                for k, r in adata['0'][4].items():
+                    if k == 'Результаты':
+                        continue
                     svotes += r[0]
                     votes.append(r[0])
                 log.debug(f'votes:{votes} svotes:{svotes}')
                 v = 0
                 for k, r in adata['0'][4].items():
+                    if k == 'Результаты':
+                        continue
                     log.debug(f"votes[{v}]:{votes[v]} svotes:{svotes}  %:{0 if not svotes else (votes[v]/svotes) * 100}")
                     atitle = f"""{atitle}\n\n{k}\n{emoji.emojize(":white_small_square:")} {0 if not svotes else (votes[v]/svotes) * 100}%
                     """
@@ -172,6 +178,10 @@ def callback_inline(call: CallbackQuery):
             bot.edit_message_caption(atitle, cid, mid, reply_markup=cases.get_ikb(log, abtns))
         except Exception as err:
             log.error(err)
+
+        if sub == 'Результаты':
+            cases.send_msg(log, bot, cid, f"Результаты опроса:\n{adata['0'][1]}\n{cases.format_listed_res(adata['0'])}")
+
         return
 
 

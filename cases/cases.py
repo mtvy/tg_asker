@@ -108,7 +108,7 @@ def push(log, bot: TeleBot, tid: str|int, cid, adata, photo: bytes, chat) -> Non
     abtns, jsonb = dict(), dict()
     for i in adata['0'][2]['Elements']:
         abtns[i] = f"{adata['0'][0]}{ASKER}{i}"
-        jsonb[i] = [0, []]
+        jsonb[i] = [0, [], []]
     
     log.debug(abtns)
     jsonb = json.dumps(jsonb)
@@ -159,20 +159,20 @@ def push(log, bot: TeleBot, tid: str|int, cid, adata, photo: bytes, chat) -> Non
         
 
 def create_ask(log, bot: TeleBot, tid: str|int) -> None:
-    def _loop_create(msg: Message, title: str, asks: List[str]) -> None:
-        log.debug(f'txt:{msg.text} title:{title} asks:{asks}')
+    def _loop_create(msg: Message, title: str, isPub: bool, asks: List[str]) -> None:
+        log.debug(f'txt:{msg.text} title:{title} asks:{asks} isPub:{isPub}')
         if msg.text == 'Назад':
             send_msg(log, bot, tid, 'Отмена создания опроса', get_kb(log, DEFALTKB))
             return
         if msg.text == 'Завершить':
             send_msg(log, bot, tid, 'Опрос создан', get_kb(log, DEFALTKB))
-            req = f"('{title}', array["
+            req = f"('{title}', {'TRUE' if isPub else 'FALSE'}, array["
             for i in asks:
                 req = f"{req}'{i}',"
-            req = f'{req[:-1]}])'
+            req = f"{req[:-1]},'Результаты'])"
             
             log.info(f"insert:'{req}'")
-            if (stat := db.insert('ask_tb', 'head, sub', req).status) != 'ok':
+            if (stat := db.insert('ask_tb', 'head, is_pub, sub', req).status) != 'ok':
                 log.error(stat)
                 send_msg(log, bot, tid, DBERR, rmvKb())
                 return
@@ -180,20 +180,26 @@ def create_ask(log, bot: TeleBot, tid: str|int) -> None:
             return
 
         asks.append(msg.text)
-        wait_msg(log, bot, tid, _loop_create, 'Введите вариант ответа', get_kb(log, ['Назад', 'Завершить']), [title, asks])
+        wait_msg(log, bot, tid, _loop_create, 'Введите вариант ответа', get_kb(log, ['Назад', 'Завершить']), [title, isPub, asks])
 
         
-    def _create(msg: Message) -> None:
+    def _create(msg: Message, isPub: bool) -> None:
         log.debug(msg.text)
         if msg.text == 'Назад':
             send_msg(log, bot, tid, 'Отмена создания опроса', get_kb(log, DEFALTKB))
             return
         
-        wait_msg(log, bot, tid, _loop_create, 'Введите вариант ответа', get_kb(log, ['Назад']), [msg.text, []])
+        wait_msg(log, bot, tid, _loop_create, 'Введите вариант ответа', get_kb(log, ['Назад']), [msg.text, isPub, []])
 
+    def _type(msg: Message) -> None:
+        if msg.text in ('Публичный', 'Анонимный'):
+            wait_msg(log, bot, tid, _create, 'Введите вопрос', 
+                     get_kb(log, ['Назад']), [True if msg.text == 'Публичный' else False])
+        else:
+            send_msg(log, bot, tid, 'Неправильный тип опроса. Отмена.', get_kb(log, DEFALTKB))
 
+    wait_msg(log, bot, tid, _type, 'Какой тип опроса?', get_kb(log, ['Публичный', 'Анонимный']), [])
 
-    wait_msg(log, bot, tid, _create, 'Введите вопрос', get_kb(log, ['Назад']), [])
 
 def send(log, bot: TeleBot, tid: str|int) -> None:
     data, stat = db.get('*', 'ask_tb', '')
@@ -392,6 +398,39 @@ def showBtn(log, bot: TeleBot, tid: str|int) -> None:
     log.debug(f'showBtn user:{tid}')
     send_msg(log, bot, tid, 'Что нужно открыть?', get_kb(log, SHOWKB))
 
+def format_listed_res(ask) -> List[str]:
+    """  
+        id serial primary key,
+        head text, 
+        sub varchar(64)[], 
+        cid integer[],
+        res jsonb,
+        stat boolean,
+        add_date timestamp not null default now()
+    """
+    max_votes = 0; max_votes_ask = '?'; sum_votes = 0
+    res = ''
+    if ask[4]:
+        for k, r in ask[4].items():
+            if k == 'Результаты':
+                continue
+            sum_votes += r[0]
+            if r[0] > max_votes:
+                max_votes = r[0]
+                max_votes_ask = k
+            res = f"""{res}
+    Ответ:{k} 
+    Всего голосов:{r[0]}
+    {'' if not ask[6] else 'Проголосовали:'+str(r[2])}
+
+            """
+        res = f"""{res}Всего голосов: {sum_votes}
+Больше всего голосов: {max_votes_ask} -> {max_votes}
+В процентах: {0 if not sum_votes else max_votes/sum_votes * 100}%
+        """
+    return res if res else 'Нет результатов'
+
+
 def formatListedAsk(data) -> List[str]:
     """  
         id serial primary key,
@@ -415,13 +454,13 @@ def formatListedAsk(data) -> List[str]:
                 res = f"""{res}
                 Ответ:{k} 
                     Всего голосов:{r[0]}
-                    Проголосовали:{r[1]}
+                    Проголосовали:{r[2]}
 
                 """
             res = f"""{res}
             Всего голосов: {sum_votes}
             Больше всего голосов: {max_votes_ask} -> {max_votes}
-            В процентах: {0 if not sum_votes else max_votes//sum_votes * 100}%
+            В процентах: {0 if not sum_votes else max_votes/sum_votes * 100}%
             """
         asks.append(f"""
     {int(ind)+1})
@@ -431,7 +470,8 @@ def formatListedAsk(data) -> List[str]:
         \tГруппы:{ask[3] if not ask[3] else ask[3]['Elements']}
         \tРезультат:{res}
         \tСтатус:{ask[5]}
-        \tДата добавления:{ask[6]}\n
+        \tПубличный:{'Да' if ask[6] else 'Нет'}
+        \tДата добавления:{ask[7]}\n
         """)
     return asks
 
@@ -467,7 +507,7 @@ def formatAsk(data) -> str:
             res = f"""{res}
             Всего голосов: {sum_votes}
             Больше всего голосов: {max_votes} у {max_votes_ask}
-            В процентах: {max_votes//sum_votes * 100}
+            В процентах: {max_votes/sum_votes * 100}
             """
         asks = f"""{asks}
     {int(ind)+1})
@@ -477,7 +517,8 @@ def formatAsk(data) -> str:
         \tГруппы:{ask[3] if not ask[3] else ask[3]['Elements']}
         \tРезультат:{res}
         \tСтатус:{ask[5]}
-        \tДата добавления:{ask[6]}\n
+        \tПубличный:{'Да' if ask[6] else 'Нет'}
+        \tДата добавления:{ask[7]}\n
         """
     return asks
     
