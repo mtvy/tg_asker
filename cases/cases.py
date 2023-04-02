@@ -19,9 +19,10 @@ from telebot.types import (
 from telethon import (
     TelegramClient,
 )
-from typing import List, Tuple
+from typing import List
 from telebot import TeleBot
-import asyncio, json, os, emoji
+from datetime import datetime
+import asyncio, json, os, emoji, base64, time
 
 TGLINK = 'https://t.me/'
 ADDKB = ['Канал/Чат', 'Опрос']
@@ -29,6 +30,7 @@ ADDKB = ['Канал/Чат', 'Опрос']
 DEFALTKB = ['Отправить', 'Опросы']
 SHOWKB = ['Опросы', 'Каналы/Чаты', 'Результаты']
 DELKB = ['Удалить опросы', 'Удалить канал/чат']
+ASKTYPEKB = ['Публичный', 'Анонимный', 'Без результата']
 
 DBERR = 'Ошибка.'
 ASKER = 'ASKER'
@@ -60,6 +62,19 @@ SENDFLAG = "SENDF"
 STOPFLAG = "STOPF"
 DELFLAG = "DELF"
 RESFLAG = "RESF"
+
+# def check_deadline(log, bot: TeleBot, tid: str|int) -> None:
+#     while True:
+#         time.sleep(10)
+#         data, stat = db.get('*', 'ask_tb', '')
+#         if stat != 'ok':
+#             log.error(f'stat:{stat} data:{data}')
+#             return
+#         if not len(data):
+#             continue
+#         now = datetime.now().strptime('%d.%m.%Y/%H:%M')
+#         for i, k in data.items():
+#             if now > datetime.strftime()
 
 def get_asks(log, bot: TeleBot, tid: str|int) -> None:
     data, stat = db.get('*', 'ask_tb', '')
@@ -130,7 +145,10 @@ def push(log, bot: TeleBot, tid: str|int, cid, adata, photo: bytes, chat) -> Non
             """
             v+=1
     send_msg(log, bot, tid, f'Отправленный опрос:\n{asks}\n\nКанал/чат: {chats}\n\nВопрос: {atitle}\nОтветы:\n{list(abtns.keys())}', get_kb(log, DEFALTKB))
-    msg = send_photo(log, bot, f'-100{cid}', atitle, photo, get_ikb(log, abtns))
+    log.warning(f"{type(adata['0'][10])} {adata['0'][10][:20]} **** {adata['0'][10][2:20]} **** {adata['0'][10][-20:]}")
+    photo = adata['0'][10].encode('utf-8')
+    photobase = base64.b64decode(photo)
+    msg = send_photo(log, bot, f'-100{cid}', atitle, photobase, get_ikb(log, abtns))
     log.debug(msg)
     if msg is None or not hasattr(msg, 'message_id'):
         log.error(f'Wrong msg:{msg}')
@@ -159,7 +177,7 @@ def push(log, bot: TeleBot, tid: str|int, cid, adata, photo: bytes, chat) -> Non
         
 
 def create_ask(log, bot: TeleBot, tid: str|int) -> None:
-    def _loop_create(msg: Message, title: str, isPub: bool, asks: List[str]) -> None:
+    def _loop_create(msg: Message, title: str, isPub: bool, asks: List[str], hasAccessToShow: bool, deadline: str|datetime, photo: bytes) -> None:
         log.debug(f'txt:{msg.text} title:{title} asks:{asks} isPub:{isPub}')
         if msg.text == 'Назад':
             send_msg(log, bot, tid, 'Отмена создания опроса', get_kb(log, DEFALTKB))
@@ -169,10 +187,15 @@ def create_ask(log, bot: TeleBot, tid: str|int) -> None:
             req = f"('{title}', {'TRUE' if isPub else 'FALSE'}, array["
             for i in asks:
                 req = f"{req}'{i}',"
-            req = f"{req[:-1]},'Результаты'])"
+            req = f"""{req[:-1]}{', Результаты' if hasAccessToShow else ''}], 
+                {hasAccessToShow}, 
+                {True if deadline else False},
+                to_timestamp('{deadline if deadline else '20.12.2023/12:00'}', 'DD.MM.YYYY/HH24:MI'),
+                '\\x{photo.hex()}'
+            )"""
             
-            log.info(f"insert:'{req}'")
-            if (stat := db.insert('ask_tb', 'head, is_pub, sub', req).status) != 'ok':
+            log.info(f"insert:'{req[:100]}'")
+            if (stat := db.insert('ask_tb', 'head, is_pub, sub, access_to_show, has_deadline, deadline, photo', req).status) != 'ok':
                 log.error(stat)
                 send_msg(log, bot, tid, DBERR, rmvKb())
                 return
@@ -180,25 +203,69 @@ def create_ask(log, bot: TeleBot, tid: str|int) -> None:
             return
 
         asks.append(msg.text)
-        wait_msg(log, bot, tid, _loop_create, 'Введите вариант ответа', get_kb(log, ['Назад', 'Завершить']), [title, isPub, asks])
+        wait_msg(log, bot, tid, _loop_create, 'Введите вариант ответа', 
+                 get_kb(log, ['Назад', 'Завершить']), [title, isPub, asks, hasAccessToShow, deadline, photo])
 
-        
-    def _create(msg: Message, isPub: bool) -> None:
+    def _create(msg: Message, isPub: bool, hasAccessToShow: bool, deadline: str|datetime, photo: bytes) -> None:
         log.debug(msg.text)
         if msg.text == 'Назад':
             send_msg(log, bot, tid, 'Отмена создания опроса', get_kb(log, DEFALTKB))
             return
         
-        wait_msg(log, bot, tid, _loop_create, 'Введите вариант ответа', get_kb(log, ['Назад']), [msg.text, isPub, []])
+        wait_msg(log, bot, tid, _loop_create, 'Введите вариант ответа', 
+                 get_kb(log, ['Назад']), [msg.text, isPub, [], hasAccessToShow, deadline, photo])
 
-    def _type(msg: Message) -> None:
-        if msg.text in ('Публичный', 'Анонимный'):
+    def _image(msg: Message, isPub: bool, hasAccessToShow: bool, deadline) -> None:
+        log.debug(f"deadline:'{deadline}' isPub:{isPub} hasAccessToShow:{hasAccessToShow}")
+        if msg.text == 'Назад':
+            send_msg(log, bot, tid, 'Отмена создания опроса', get_kb(log, DEFALTKB))
+            return
+        try:
+            file_info = bot.get_file(msg.photo[-1].file_id)
+            photo = bot.download_file(file_info.file_path)
+            log.debug("Got photo")
             wait_msg(log, bot, tid, _create, 'Введите вопрос', 
-                     get_kb(log, ['Назад']), [True if msg.text == 'Публичный' else False])
+                     get_kb(log, ['Назад']), [isPub, hasAccessToShow, deadline, photo])
+        except Exception as err:
+            log.error(err)
+            wait_msg(log, bot, tid, _image, 'Ошибка загрузки изображения. Отправьте логотип/картинку для опроса ещё раз', 
+                     get_kb(log, ['Назад']), [isPub, hasAccessToShow, deadline])
+
+    def _set_time(msg: Message, isPub: bool, hasAccessToShow: bool) -> None:
+        log.debug(f"time:'{msg.text}' isPub:{isPub} hasAccessToShow:{hasAccessToShow}")
+        if msg.text == 'Назад':
+            send_msg(log, bot, tid, 'Отмена создания опроса', get_kb(log, DEFALTKB))
+            return
+        try:
+            deadline = datetime.strptime(msg.text, '%d.%m.%Y/%H:%M')
+            log.debug(deadline.isoformat())
+            wait_msg(log, bot, tid, _image, 'Отправьте логотип/картинку для опроса', 
+                     get_kb(log, ['Назад']), [isPub, hasAccessToShow, msg.text])
+        except Exception as err:
+            log.error(err)
+            wait_msg(log, bot, tid, _set_time, 'Не верный введенный формат',
+                     get_kb(log, ['Назад']), [isPub, hasAccessToShow])
+
+    def _time(msg: Message, isPub: bool, hasAccessToShow: bool) -> None:
+        if msg.text == 'Да':
+            wait_msg(log, bot, tid, _set_time, 'укажите дату окончания опроса в формате (20.12.2023/12:00)',
+                     get_kb(log, ['Назад']), [isPub, hasAccessToShow])
+        else:
+            wait_msg(log, bot, tid, _image, 'Отправьте логотип/картинку для опроса', 
+                     get_kb(log, ['Назад']), [isPub, hasAccessToShow, ''])
+            
+    def _type(msg: Message) -> None:
+        if msg.text in ('Публичный', 'Анонимный', 'Без результата'):
+            wait_msg(log, bot, tid, _time, 'Добавить время существования опроса?', 
+                get_kb(log, ['Да', 'Нет']), 
+                [
+                    True if msg.text == 'Публичный' else False,
+                    False if msg.text == 'Без результата' else True,
+                ])
         else:
             send_msg(log, bot, tid, 'Неправильный тип опроса. Отмена.', get_kb(log, DEFALTKB))
 
-    wait_msg(log, bot, tid, _type, 'Какой тип опроса?', get_kb(log, ['Публичный', 'Анонимный']), [])
+    wait_msg(log, bot, tid, _type, 'Какой тип опроса?', get_kb(log, ASKTYPEKB), [])
 
 
 def send(log, bot: TeleBot, tid: str|int) -> None:
@@ -471,7 +538,11 @@ def formatListedAsk(data) -> List[str]:
         \tРезультат:{res}
         \tСтатус:{ask[5]}
         \tПубличный:{'Да' if ask[6] else 'Нет'}
-        \tДата добавления:{ask[7]}\n
+        \tМожно посмотреть результаты:{'Да' if ask[7] else 'Нет'}
+        \tЕсть дедлайн опроса:{'Да' if ask[8] else 'Нет'}
+        \tДата дедлайна:{ask[9]}\n
+        \tРhoto:-\n
+        \tДата добавления:{ask[11]}\n
         """)
     return asks
 
@@ -518,7 +589,11 @@ def formatAsk(data) -> str:
         \tРезультат:{res}
         \tСтатус:{ask[5]}
         \tПубличный:{'Да' if ask[6] else 'Нет'}
-        \tДата добавления:{ask[7]}\n
+        \tМожно посмотреть результаты:{'Да' if ask[7] else 'Нет'}
+        \tЕсть дедлайн опроса:{'Да' if ask[8] else 'Нет'}
+        \tДата дедлайна:{ask[9]}\n
+        \tРhoto:-\n
+        \tДата добавления:{ask[11]}\n
         """
     return asks
     

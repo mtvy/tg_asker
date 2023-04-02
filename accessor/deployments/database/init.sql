@@ -16,6 +16,10 @@ create table ask_tb (
     res jsonb,
     stat boolean,
     is_pub boolean,
+    access_to_show boolean,
+    has_deadline boolean,
+    deadline timestamp default null,
+    photo bytea,
     add_date timestamp not null default now()
 );
 

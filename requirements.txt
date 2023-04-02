@@ -7,3 +7,4 @@ grpcio==1.51.1
 pylint==2.17.0
 radon==5.1.0
 emoji
+Pillow

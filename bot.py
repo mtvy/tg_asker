@@ -6,6 +6,7 @@ from telebot.types import (
     Message,
     ForceReply,
 )
+from datetime import datetime
 
 import cases, data
 
@@ -114,6 +115,13 @@ def callback_inline(call: CallbackQuery):
             log.warning(f'Asker is not at the table. Delete:{cases.del_msg(log, bot, cid, mid)}')
             return
 
+        now = datetime.now()
+        # now = now.strptime(datetime.now().strftime('%d.%m.%Y/%H:%M'), '%d.%m.%Y/%H:%M')
+        log.debug(f"now:{now} deadline:{data['0'][8]}:{data['0'][9]}")
+        if data['0'][8] and now > datetime.strptime(data['0'][9], '%Y-%m-%dT%H:%M:%SZ'):
+            bot.edit_message_caption(f"Опрос закончен: {data['0'][9]}", cid, mid, reply_markup=None)
+            return
+
         jsonb = data['0'][4]
         log.debug(jsonb)
         if sub not in jsonb.keys():
@@ -196,5 +204,6 @@ if __name__ == "__main__":
     try:
         log.info('Starting...')
         bot.polling(allowed_updates="chat_member")
+        # cases.init_proc(check_deadline, [])
     except Exception as err:
         log.error(f'Get polling error.\n\n{err}\n\n{tb.format_exc()}')
