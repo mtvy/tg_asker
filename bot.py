@@ -205,13 +205,13 @@ def callback_inline(call: CallbackQuery):
                 return
             
             if cases.results[mid].is_active:
-                delta_time = now - cases.results[mid].init_time
-                if delta_time > timedelta(seconds=10):
-                    log.debug(f'Delta of res time > 10s del_res:{cases.del_msg(log, bot, cid, cases.results[mid].rid)}')
-                    msg = cases.send_msg(log, bot, cid, f"Результаты опроса:\n{adata['0'][1]}\n{cases.format_listed_res(adata['0'])}")
-                    cases.results[mid].set_result(msg.message_id, True, datetime.now())
-                    log.debug(f"init new res: mid:{mid} rid:{msg.message_id}")
-                    return
+                # delta_time = now - cases.results[mid].init_time
+                # if delta_time > timedelta(seconds=10):
+                #     log.debug(f'Delta of res time > 10s del_res:{cases.del_msg(log, bot, cid, cases.results[mid].rid)}')
+                #     msg = cases.send_msg(log, bot, cid, f"Результаты опроса:\n{adata['0'][1]}\n{cases.format_listed_res(adata['0'])}")
+                #     cases.results[mid].set_result(msg.message_id, True, datetime.now())
+                #     log.debug(f"init new res: mid:{mid} rid:{msg.message_id}")
+                #     return
 
                 if cases.results[mid].rid is None:
                     log.error(f"mid:{mid} cases.results[mid].rid: {cases.results[mid].rid} is None")
