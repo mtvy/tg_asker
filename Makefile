@@ -21,16 +21,16 @@ upload: up-serve up
 up-serve:
 	cd accessor && make db-d && make up-d
 up:
-	cd deploy && docker-compose up -d --build
+	cd deploy && sudo docker-compose up -d --build
 
 shutdown: shut down-serve down
 
 down-serve:
 	cd accessor && make shut && make shutdown && make down
 shut:
-	docker stop tg_asker
+	sudo docker stop tg_asker
 down:
-	cd deploy && docker-compose down
+	cd deploy && sudo docker-compose down
 # - - - - - - - - - - - - - - - - -
 
 # - - - - - - - - - - - - - - - - -

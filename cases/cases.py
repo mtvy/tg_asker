@@ -175,6 +175,7 @@ def push(log, bot: TeleBot, tid: str|int, cid, adata, photo: bytes, chat) -> Non
             return
 
         
+RES_T=", 'Результаты'"
 
 def create_ask(log, bot: TeleBot, tid: str|int) -> None:
     def _loop_create(msg: Message, title: str, isPub: bool, asks: List[str], hasAccessToShow: bool, deadline: str|datetime, photo: bytes) -> None:
@@ -187,7 +188,7 @@ def create_ask(log, bot: TeleBot, tid: str|int) -> None:
             req = f"('{title}', {'TRUE' if isPub else 'FALSE'}, array["
             for i in asks:
                 req = f"{req}'{i}',"
-            req = f"""{req[:-1]}{', Результаты' if hasAccessToShow else ''}], 
+            req = f"""{req[:-1]}{RES_T if hasAccessToShow else ''}], 
                 {hasAccessToShow}, 
                 {True if deadline else False},
                 to_timestamp('{deadline if deadline else '20.12.2023/12:00'}', 'DD.MM.YYYY/HH24:MI'),

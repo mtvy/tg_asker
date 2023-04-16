@@ -11,30 +11,30 @@ run:
 # Run Server
 # - - - - - - - - - - - - - - - - -
 db:
-	cd deployments && docker-compose -f docker-compose-database.yml up --build
+	cd deployments && sudo docker-compose -f docker-compose-database.yml up --build
 db-d:
-	cd deployments && docker-compose -f docker-compose-database.yml up -d --build
+	cd deployments && sudo docker-compose -f docker-compose-database.yml up -d --build
 db-down:
-	cd deployments && docker-compose -f docker-compose-database.yml down
+	cd deployments && sudo docker-compose -f docker-compose-database.yml down
 
 up:
-	cd deployments && docker-compose up --build
+	cd deployments && sudo docker-compose up --build
 up-d:
-	cd deployments && docker-compose up -d --build
+	cd deployments && sudo docker-compose up -d --build
 down:
-	cd deployments && docker-compose down
+	cd deployments && sudo docker-compose down
 shut:
-	docker stop postgres
-	docker stop db_exporter
-	docker stop grafana
-	docker stop loki
-	docker stop promtail
-	docker stop jaeger
-	docker stop prometheus
-	docker stop metrics_exporter
-	docker stop db_accessor
+	sudo docker stop postgres
+	sudo docker stop db_exporter
+	sudo docker stop grafana
+	sudo docker stop loki
+	sudo docker stop promtail
+	sudo docker stop jaeger
+	sudo docker stop prometheus
+	sudo docker stop metrics_exporter
+	sudo docker stop db_accessor
 shutdown:
-	cd deployments && docker-compose -f docker-compose-database.yml down && docker-compose down
+	cd deployments && sudo docker-compose -f docker-compose-database.yml down && sudo docker-compose down
 # - - - - - - - - - - - - - - - - -
 
 
