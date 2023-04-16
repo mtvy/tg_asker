@@ -47,6 +47,8 @@ def noAccess(bot: TeleBot, tid: str | int) -> None:
 
 @bot.message_handler(commands=['start'])
 def start(msg: Message) -> None:
+    if not msg.chat.type == "private":
+        return
     tid = str(msg.chat.id)
     if tid in admins:
         log.info(f'Bot starting by user:{tid}.')
@@ -58,6 +60,9 @@ def start(msg: Message) -> None:
 
 @bot.message_handler(content_types=['text'])
 def menu(msg: Message) -> None:
+
+    if not msg.chat.type == "private":
+        return
     
     tid = str(msg.chat.id)
     txt = msg.text
@@ -118,7 +123,7 @@ def callback_inline(call: CallbackQuery):
             return
 
         now = datetime.now()
-        # now = now.strptime(datetime.now().strftime('%d.%m.%Y/%H:%M'), '%d.%m.%Y/%H:%M')
+
         log.debug(f"now:{now} deadline:{data['0'][8]}:{data['0'][9]}")
         if data['0'][8] and now > datetime.strptime(data['0'][9], '%Y-%m-%dT%H:%M:%SZ'):
             bot.edit_message_caption(f"Опрос закончен: {data['0'][9]}", cid, mid, reply_markup=None)
