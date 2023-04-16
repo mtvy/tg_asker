@@ -16,3 +16,8 @@ from .handler import (
     start_proc,
     kill_proc,
 )
+
+from .res import (
+    Result,
+    results,
+)

@@ -4,9 +4,11 @@ from telebot.types import (
     ReplyKeyboardRemove as rmvKb,
     CallbackQuery, 
     Message,
-    ForceReply,
 )
-from datetime import datetime
+from datetime import (
+    datetime, 
+    timedelta,
+)
 
 import cases, data
 
@@ -188,22 +190,46 @@ def callback_inline(call: CallbackQuery):
             log.error(err)
 
         if sub == 'Результаты':
-            cases.send_msg(log, bot, cid, f"Результаты опроса:\n{adata['0'][1]}\n{cases.format_listed_res(adata['0'])}")
+
+            log.debug(f"results: {cases.results}")
+            
+            if mid not in cases.results.keys():
+                log.error(f"mid:{mid} not at results")
+                cases.results[mid] = cases.Result(mid)
+                cases.send_msg(log, bot, cid, f"Результаты недоступны.")
+                return
+            
+            if cases.results[mid].is_active:
+                delta_time = now - cases.results[mid].init_time
+                if delta_time > timedelta(seconds=10):
+                    log.debug(f'Delta of res time > 10s del_res:{cases.del_msg(log, bot, cid, cases.results[mid].rid)}')
+                    msg = cases.send_msg(log, bot, cid, f"Результаты опроса:\n{adata['0'][1]}\n{cases.format_listed_res(adata['0'])}")
+                    cases.results[mid].set_result(msg.message_id, True, datetime.now())
+                    log.debug(f"init new res: mid:{mid} rid:{msg.message_id}")
+                    return
+
+                if cases.results[mid].rid is None:
+                    log.error(f"mid:{mid} cases.results[mid].rid: {cases.results[mid].rid} is None")
+                    cases.send_msg(log, bot, cid, f"Результаты недоступны.")
+                    return
+                
+                try:
+                    log.debug(f"edit_message_text cid:{cid} res.rid:{cases.results[mid].rid}")
+                    bot.edit_message_text(f"Результаты опроса:\n{adata['0'][1]}\n{cases.format_listed_res(adata['0'])}", cid, cases.results[mid].rid)
+                except Exception as err:
+                    log.error(err)
+                return
+
+            msg = cases.send_msg(log, bot, cid, f"Результаты опроса:\n{adata['0'][1]}\n{cases.format_listed_res(adata['0'])}")
+            cases.results[mid].set_result(msg.message_id, True, datetime.now())
+            log.debug(f"init new res: mid:{mid} rid:{msg.message_id}")
 
         return
-
-
-
-    # if cases.ASKER not in data:
-    #     log.debug(f'Wrong format data:{data}')
-    #     return
-    
     
 
 if __name__ == "__main__":
     try:
         log.info('Starting...')
         bot.polling(allowed_updates="chat_member")
-        # cases.init_proc(check_deadline, [])
     except Exception as err:
         log.error(f'Get polling error.\n\n{err}\n\n{tb.format_exc()}')

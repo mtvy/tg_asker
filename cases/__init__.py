@@ -13,6 +13,9 @@ from .utils import (
     init_proc,
     start_proc,
     kill_proc,
+
+    Result,
+    results,
 )
 from .db import (
     db,

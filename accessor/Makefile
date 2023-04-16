@@ -11,30 +11,30 @@ run:
 # Run Server
 # - - - - - - - - - - - - - - - - -
 db:
-	cd deployments && sudo docker-compose -f docker-compose-database.yml up --build
+	cd deployments && $(SUDO) docker-compose -f docker-compose-database.yml up --build
 db-d:
-	cd deployments && sudo docker-compose -f docker-compose-database.yml up -d --build
+	cd deployments && $(SUDO) docker-compose -f docker-compose-database.yml up -d --build
 db-down:
-	cd deployments && sudo docker-compose -f docker-compose-database.yml down
+	cd deployments && $(SUDO) docker-compose -f docker-compose-database.yml down
 
 up:
-	cd deployments && sudo docker-compose up --build
+	cd deployments && $(SUDO) docker-compose up --build
 up-d:
-	cd deployments && sudo docker-compose up -d --build
+	cd deployments && $(SUDO) docker-compose up -d --build
 down:
-	cd deployments && sudo docker-compose down
+	cd deployments && $(SUDO) docker-compose down
 shut:
-	sudo docker stop postgres
-	sudo docker stop db_exporter
-	sudo docker stop grafana
-	sudo docker stop loki
-	sudo docker stop promtail
-	sudo docker stop jaeger
-	sudo docker stop prometheus
-	sudo docker stop metrics_exporter
-	sudo docker stop db_accessor
+	$(SUDO) docker stop postgres
+	$(SUDO) docker stop db_exporter
+	$(SUDO) docker stop grafana
+	$(SUDO) docker stop loki
+	$(SUDO) docker stop promtail
+	$(SUDO) docker stop jaeger
+	$(SUDO) docker stop prometheus
+	$(SUDO) docker stop metrics_exporter
+	$(SUDO) docker stop db_accessor
 shutdown:
-	cd deployments && sudo docker-compose -f docker-compose-database.yml down && sudo docker-compose down
+	cd deployments && $(SUDO) docker-compose -f docker-compose-database.yml down && $(SUDO) docker-compose down
 # - - - - - - - - - - - - - - - - -
 
 
