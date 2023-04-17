@@ -21,3 +21,7 @@ from .res import (
     Result,
     results,
 )
+
+from .bar import (
+    get_base64_graph,
+)

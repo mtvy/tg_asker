@@ -325,6 +325,28 @@ def redirect(log, bot: TeleBot, tid: str|int, dev: str|int, aid: str, cid: str|i
     wait_msg(log, bot, tid, _redirect, 'Введите ссылку на канал/чат.', rmvKb(), [log, bot, tid, cid, data])
 
 
+def get_vals_n_subs(ask) -> tuple[list[int], list[str]]:
+    max_votes = 0; sum_votes = 0
+    vals = []; subs = []
+    
+    if ask[4]:
+        for k, r in ask[4].items():
+            if k == 'Результаты':
+                continue
+            sum_votes += r[0]
+            if r[0] > max_votes:
+                max_votes = r[0]
+
+        for k, r in ask[4].items():
+            if k == 'Результаты':
+                continue
+            if sum_votes:
+                vals.append(r[0]/sum_votes*100)
+            else:
+                vals.append(0)
+            subs.append(k)
+
+    return vals, subs
 
 def format_listed_res(ask) -> List[str]:
     """  

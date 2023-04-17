@@ -12,7 +12,7 @@ from datetime import (
 
 import cases, data
 
-import dotenv, os, json, emoji
+import dotenv, os, json, emoji, base64
 import logger, traceback as tb
 
 dotenv.load_dotenv('.env')
@@ -219,13 +219,25 @@ def callback_inline(call: CallbackQuery):
                     return
                 
                 try:
-                    log.debug(f"edit_message_text cid:{cid} res.rid:{cases.results[mid].rid}")
-                    bot.edit_message_text(f"Результаты опроса:\n{adata['0'][1]}\n{cases.format_listed_res(adata['0'])}", cid, cases.results[mid].rid)
+                    abtns, jsonb = dict(), dict()
+                    for i in adata['0'][2]['Elements']:
+                        abtns[i] = f"{adata['0'][0]}{cases.ASKER}{i}"
+                        jsonb[i] = [0, []]
+                    
+                    log.debug(f'abtns:{abtns} atitle:{atitle}')
+                    log.debug(f"edit_message_caption cid:{cid} res.rid:{cases.results[mid].rid}")
+                    vals, subs = cases.get_vals_n_subs()
+                    photobase = base64.b64decode(cases.get_base64_graph(log, f"Результаты опроса:\n{adata['0'][1]}", vals, subs))
+                    bot.edit_message_media(photobase, cid, mid, reply_markup=cases.get_ikb(log, abtns))
+                    # bot.edit_message_text(f"Результаты опроса:\n{adata['0'][1]}\n{cases.format_listed_res(adata['0'])}", cid, cases.results[mid].rid)
                 except Exception as err:
                     log.error(err)
                 return
 
-            msg = cases.send_msg(log, bot, cid, f"Результаты опроса:\n{adata['0'][1]}\n{cases.format_listed_res(adata['0'])}")
+            vals, subs = cases.get_vals_n_subs()
+            photobase = base64.b64decode(cases.get_base64_graph(log, f"Результаты опроса:\n{adata['0'][1]}", vals, subs))
+            msg = cases.send_photo(log, bot, cid, "Результаты опроса", photobase)
+            
             cases.results[mid].set_result(msg.message_id, True, datetime.now())
             log.debug(f"init new res: mid:{mid} rid:{msg.message_id}")
 

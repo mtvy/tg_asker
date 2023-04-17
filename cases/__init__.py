@@ -16,6 +16,8 @@ from .utils import (
 
     Result,
     results,
+
+    get_base64_graph,
 )
 from .db import (
     db,
@@ -33,4 +35,5 @@ from .cases import (
     DBERR,
     
     ASKER,
+    get_vals_n_subs,
 )
