@@ -46,10 +46,10 @@ def get_base64_graph(log, ask_title: str, vals: list[int], sub_titles: list[str]
             plt.text(val+1, v-0.1, val, color="indigo", fontsize=12)
             plt.barh(sub_title, val, color=color)
     
-        plt.xlabel('%', fontsize=18)
+        # plt.xlabel('%', fontsize=18)
         off_frame()
         
-        plt.title(f'Резальтаты опроса: {ask_title}', fontsize=18)
+        # plt.title(f'Резальтаты опроса: {ask_title}', fontsize=18)
 
         buffer = io.BytesIO()
         plt.savefig(buffer, format='png')
