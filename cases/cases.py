@@ -325,10 +325,10 @@ def redirect(log, bot: TeleBot, tid: str|int, dev: str|int, aid: str, cid: str|i
     wait_msg(log, bot, tid, _redirect, 'Введите ссылку на канал/чат.', rmvKb(), [log, bot, tid, cid, data])
 
 
-def get_vals_n_subs(ask) -> tuple[list[int], list[str]]:
+def get_vals_n_subs(log, ask) -> tuple[list[int], list[str]]:
     max_votes = 0; sum_votes = 0
     vals = []; subs = []
-    
+
     if ask[4]:
         for k, r in ask[4].items():
             if k == 'Результаты':
@@ -346,6 +346,7 @@ def get_vals_n_subs(ask) -> tuple[list[int], list[str]]:
                 vals.append(0)
             subs.append(k)
 
+    log.debug(f"vals:{vals} subs:{subs}")
     return vals, subs
 
 def format_listed_res(ask) -> List[str]:
