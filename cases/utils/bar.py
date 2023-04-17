@@ -1,6 +1,5 @@
 import matplotlib.pyplot as plt
-import base64, io, random
-import seaborn as sns
+import io, random
 
 def off_frame() -> None:
     plt.gca().spines["top"].set_visible(False)    
