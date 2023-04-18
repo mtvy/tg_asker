@@ -180,7 +180,7 @@ def callback_inline(call: CallbackQuery):
                     if k == 'Результаты':
                         continue
                     log.debug(f"votes[{v}]:{votes[v]} svotes:{svotes}  %:{0 if not svotes else (votes[v]/svotes) * 100}")
-                    atitle = f"""{atitle}\n\n{k}\n{emoji.emojize(":white_small_square:")} {0 if not svotes else (votes[v]/svotes) * 100}%
+                    atitle = f"""{atitle}\n\n{k}\n{emoji.emojize(":white_small_square:")} {0 if not svotes else round((votes[v]/svotes) * 100, 1)}%
                     """
                     v+=1
                 

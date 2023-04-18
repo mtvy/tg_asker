@@ -377,7 +377,7 @@ def format_listed_res(ask) -> List[str]:
             """
         res = f"""{res}Всего голосов: {sum_votes}
 Больше всего голосов: {max_votes_ask} -> {max_votes}
-В процентах: {0 if not sum_votes else max_votes/sum_votes * 100}%
+В процентах: {0 if not sum_votes else round(max_votes/sum_votes * 100, 1)}%
         """
     return res if res else 'Нет результатов'
 
@@ -410,7 +410,7 @@ def formatListedAsk(data) -> List[str]:
             res = f"""{res}
             Всего голосов: {sum_votes}
             Больше всего голосов: {max_votes_ask} -> {max_votes}
-            В процентах: {0 if not sum_votes else max_votes/sum_votes * 100}%
+            В процентах: {0 if not sum_votes else round(max_votes/sum_votes * 100, 1)}%
             """
         asks.append(f"""
     {int(ind)+1})
@@ -461,7 +461,7 @@ def formatAsk(data) -> str:
             res = f"""{res}
             Всего голосов: {sum_votes}
             Больше всего голосов: {max_votes} у {max_votes_ask}
-            В процентах: {max_votes/sum_votes * 100}
+            В процентах: {round(max_votes/sum_votes * 100, 1)}
             """
         asks = f"""{asks}
     {int(ind)+1})
