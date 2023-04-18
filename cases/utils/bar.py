@@ -40,7 +40,7 @@ def get_base64_graph(log, ask_title: str, vals: list[int], sub_titles: list[str]
     try:
         colors = random.choices(list(plt.cm.colors.cnames.keys()), k=len(vals))
 
-        plt.figure(figsize=(10+len(vals)/10, len(vals)/1.2))
+        plt.figure(figsize=(10+len(vals)/10, len(vals)))
     
         for color, sub_title, val, v in zip(colors, sub_titles, vals, range(len(vals))):
             plt.text(val+1, v-0.1, val, color="indigo", fontsize=12)
