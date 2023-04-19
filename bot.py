@@ -231,7 +231,7 @@ def callback_inline(call: CallbackQuery):
                     # photobase = base64.b64decode(cases.get_base64_graph(log, "", vals, subs).decode('utf-8'))
                     # bot.edit_message_media(media=cases.get_base64_graph(log, "", vals, subs), chat_id=cid, message_id=cases.results[mid].rid)
                     # bot.edit_message_text(f"Результаты опроса:\n{adata['0'][1]}\n{cases.format_listed_res(adata['0'])}", cid, cases.results[mid].rid)
-
+                    log.debug(f'Delta of res time > 10s del_res:{cases.del_msg(log, bot, cid, cases.results[mid].rid)}')
                     msg = cases.send_photo(log, bot, cid, f"Результаты опроса:\n{adata['0'][1]}", cases.get_base64_graph(log, "", vals, subs))
                     cases.results[mid].set_result(msg.message_id, True, datetime.now())
                     log.debug(f"init new res: mid:{mid} rid:{msg.message_id}")
