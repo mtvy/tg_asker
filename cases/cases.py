@@ -128,8 +128,8 @@ def push(log, bot: TeleBot, tid: str|int, cid, adata, photo: bytes, chat) -> Non
         
         v = 0
         for k, r in adata['0'][4].items():
-            log.debug(f"votes[{v}]:{votes[v]} svotes:{svotes}  %:{0 if not svotes else (votes[v]/svotes) * 100}")
-            atitle = f"""{atitle}\n\n{k}\n{emoji.emojize(":white_small_square:")} {0 if not svotes else (votes[v]/svotes) * 100}%
+            log.debug(f"votes[{v}]:{votes[v]} svotes:{svotes}  %:{0 if not svotes else round((votes[v]/svotes) * 100, 1)}")
+            atitle = f"""{atitle}\n\n{k}\n{emoji.emojize(":white_small_square:")} {0 if not svotes else round((votes[v]/svotes) * 100, 1)}%
             """
             v+=1
     send_msg(log, bot, tid, f'Отправленный опрос:\n{asks}\n\nКанал/чат: {chats}\n\nВопрос: {atitle}\nОтветы:\n{list(abtns.keys())}', get_kb(log, DEFALTKB))
@@ -341,7 +341,7 @@ def get_vals_n_subs(log, ask) -> tuple[list[int], list[str]]:
             if k == 'Результаты':
                 continue
             if sum_votes:
-                vals.append(r[0]/sum_votes*100)
+                vals.append(round(r[0]/sum_votes*100, 1))
             else:
                 vals.append(0)
             subs.append(k)
@@ -522,7 +522,7 @@ def formatRes(data) -> str:
             Больше всего голосов:
                 Число голосов: {max_votes}
                 Тема: {max_votes_ask}
-                Процент относительно всех голосов: {'-' if not (max_votes and sum_votes) else (100*max_votes)/sum_votes}
+                Процент относительно всех голосов: {'-' if not (max_votes and sum_votes) else round((100*max_votes)/sum_votes, 1)}
         {res}
         """
         chats = f"""{chats}
