@@ -38,6 +38,7 @@ def test(ask_title: str) -> None:
 def get_base64_graph(log, ask_title: str, vals: list[int], sub_titles: list[str]) -> bytes:
 
     try:
+        log.debug("get_base64_graph")
         colors = random.choices(list(plt.cm.colors.cnames.keys()), k=len(vals))
 
         plt.figure(figsize=(10, len(vals)+2))
@@ -56,7 +57,9 @@ def get_base64_graph(log, ask_title: str, vals: list[int], sub_titles: list[str]
         buffer.seek(0)
 
         # photobase = base64.b64decode(photo)
-        return buffer.getvalue()
+        img = buffer.getvalue()
+        log.debug(f"got img")
+        return img
     except Exception as err:
         log.error(err)
 
