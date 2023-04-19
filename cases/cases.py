@@ -128,6 +128,8 @@ def push(log, bot: TeleBot, tid: str|int, cid, adata, photo: bytes, chat) -> Non
         
         v = 0
         for k, r in adata['0'][4].items():
+            if k == 'Результаты':
+                continue
             log.debug(f"votes[{v}]:{votes[v]} svotes:{svotes}  %:{0 if not svotes else round((votes[v]/svotes) * 100, 1)}")
             atitle = f"""{atitle}\n\n{k}\n{emoji.emojize(":white_small_square:")} {0 if not svotes else round((votes[v]/svotes) * 100, 1)}%
             """
