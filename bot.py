@@ -228,8 +228,8 @@ def callback_inline(call: CallbackQuery):
                     log.debug(f'abtns:{abtns} atitle:{atitle}')
                     log.debug(f"edit_message_caption cid:{cid} res.rid:{cases.results[mid].rid}")
                     vals, subs = cases.get_vals_n_subs(log, adata['0'])
-                    photobase = base64.b64decode(cases.get_base64_graph(log, "", vals, subs).decode('utf-8'))
-                    bot.edit_message_media(media=photobase, chat_id=cid, message_id=mid)
+                    # photobase = base64.b64decode(cases.get_base64_graph(log, "", vals, subs).decode('utf-8'))
+                    bot.edit_message_media(media=cases.get_base64_graph(log, "", vals, subs), chat_id=cid, message_id=cases.results[mid].rid)
                     # bot.edit_message_text(f"Результаты опроса:\n{adata['0'][1]}\n{cases.format_listed_res(adata['0'])}", cid, cases.results[mid].rid)
                 except Exception as err:
                     log.error(err)
