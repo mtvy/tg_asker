@@ -190,7 +190,7 @@ def callback_inline(call: CallbackQuery):
                 jsonb[i] = [0, []]
             
             log.debug(f'abtns:{abtns} atitle:{atitle}')
-            if sub != 'Результаты':
+            if sub != 'Результаты' and adata['0'][7]:
                 bot.edit_message_caption(atitle, cid, mid, reply_markup=cases.get_ikb(log, abtns))
         except Exception as err:
             log.error(err)

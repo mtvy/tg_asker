@@ -121,7 +121,7 @@ def push(log, bot: TeleBot, tid: str|int, cid, adata, photo: bytes, chat) -> Non
 
     votes = []; svotes = 0
 
-    if adata['0'][4]:
+    if adata['0'][4] and adata['0'][7]:
         for k, r in adata['0'][4].items():
             if k == 'Результаты':
                 continue
