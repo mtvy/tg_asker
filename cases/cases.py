@@ -396,7 +396,8 @@ def formatListedAsk(data) -> List[str]:
         add_date timestamp not null default now()
     """
     asks = []
-    for ind, ask in data.items():
+    sorted_asks = sorted(list(data.values()), key=lambda x: x)
+    for ind, ask in zip(range(len(sorted_asks)), sorted_asks):
         max_votes = 0; max_votes_ask = '?'; sum_votes = 0
         res = ''
         if ask[4]:
