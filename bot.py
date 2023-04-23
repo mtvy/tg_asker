@@ -6,13 +6,12 @@ from telebot.types import (
     Message,
 )
 from datetime import (
-    datetime, 
-    timedelta,
+    datetime,
 )
 
 import cases, data
 
-import dotenv, os, json, emoji, base64
+import dotenv, os, json, emoji
 import logger, traceback as tb
 
 dotenv.load_dotenv('.env')
@@ -190,6 +189,11 @@ def callback_inline(call: CallbackQuery):
                 jsonb[i] = [0, []]
             
             log.debug(f'abtns:{abtns} atitle:{atitle}')
+            if sub != 'Результаты':
+                try:
+                    bot.answer_callback_query(callback_query_id=call.id, show_alert=True, text="Вы проголосовали!")
+                except Exception as err:
+                    log.error(err)
             if sub != 'Результаты' and adata['0'][7]:
                 bot.edit_message_caption(atitle, cid, mid, reply_markup=cases.get_ikb(log, abtns))
         except Exception as err:
@@ -228,9 +232,6 @@ def callback_inline(call: CallbackQuery):
                     log.debug(f'abtns:{abtns} atitle:{atitle}')
                     log.debug(f"edit_message_caption cid:{cid} res.rid:{cases.results[mid].rid}")
                     vals, subs = cases.get_vals_n_subs(log, adata['0'])
-                    # photobase = base64.b64decode(cases.get_base64_graph(log, "", vals, subs).decode('utf-8'))
-                    # bot.edit_message_media(media=cases.get_base64_graph(log, "", vals, subs), chat_id=cid, message_id=cases.results[mid].rid)
-                    # bot.edit_message_text(f"Результаты опроса:\n{adata['0'][1]}\n{cases.format_listed_res(adata['0'])}", cid, cases.results[mid].rid)
                     log.debug(f'Delta of res time > 10s del_res:{cases.del_msg(log, bot, cid, cases.results[mid].rid)}')
                     msg = cases.send_photo(log, bot, cid, f"Результаты опроса:\n{adata['0'][1]}", cases.get_base64_graph(log, "", vals, subs))
                     cases.results[mid].set_result(msg.message_id, True, datetime.now())
@@ -240,7 +241,6 @@ def callback_inline(call: CallbackQuery):
                 return
 
             vals, subs = cases.get_vals_n_subs(log, adata['0'])
-            # photobase = base64.b64decode(cases.get_base64_graph(log, f"Результаты опроса:\n{adata['0'][1]}", vals, subs).decode('utf-8'))
             msg = cases.send_photo(log, bot, cid, f"Результаты опроса:\n{adata['0'][1]}", cases.get_base64_graph(log, "", vals, subs))
             
             cases.results[mid].set_result(msg.message_id, True, datetime.now())
