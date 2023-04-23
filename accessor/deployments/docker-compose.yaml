@@ -44,9 +44,9 @@ services:
       - mainnet
 
   db_accessor:
+    image: mtvy/grpc_database_accessor:latest
     container_name: db_accessor
     hostname: accessor
-    build: ../build
     ports:
       - "8080:8080"
       - "8024:8024"
