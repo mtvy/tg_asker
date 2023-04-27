@@ -100,7 +100,7 @@ def get_asks(log, bot: TeleBot, tid: str|int) -> None:
     send_msg(log, bot, tid, f'Все опросы', get_kb(log, DEFALTKB))
 
 def push(log, bot: TeleBot, tid: str|int, cid, adata, photo: bytes, chat) -> None:
-    log.debug(adata)
+    # log.debug(adata)
     log.debug(cid)
     if not len(adata) or not len(adata['0']):
         log.debug(f'Empty or wrong adata:{adata}')
