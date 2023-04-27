@@ -144,10 +144,11 @@ def callback_inline(call: CallbackQuery):
 
         for i in jsonb.keys():
             if uid in jsonb[i][1] and i != 'Результаты':
-                try:
-                    bot.answer_callback_query(callback_query_id=call.id, show_alert=True, text="Вы уже голосовали!")
-                except Exception as err:
-                    log.error(err)
+                if sub != 'Результаты':
+                    try:
+                        bot.answer_callback_query(callback_query_id=call.id, show_alert=True, text="Вы уже голосовали!")
+                    except Exception as err:
+                        log.error(err)
                 log.info(f'uid:{uid} was at sub:{i} val:{jsonb[i][1]}')
                 break
         else:
