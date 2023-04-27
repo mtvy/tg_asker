@@ -551,8 +551,11 @@ def handle(log, bot: TeleBot, cid: int|str, mid: int|str, rid: int|str) -> None:
     log.debug(f"Enter handler: mid:{mid} cid:{cid} rid:{rid}")
     time.sleep(5)
     if results[mid].is_active:
-        del_msg(log, bot, cid, rid)
+        for i in range(5):
+            log.debug(f"Try:{i} to del")
+            if del_msg(log, bot, cid, rid):
+                log.debug("Deleted")
+                break
         results[mid].off()
-        log.debug("Del")
         return
     log.debug("Skip")
