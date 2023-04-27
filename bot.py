@@ -116,7 +116,7 @@ def callback_inline(call: CallbackQuery):
             log.error(stat)
             cases.send_msg(log, bot, dev, cases.DBERR)
             return
-        log.debug(data)
+        # log.debug(data)
         if not len(data) or not len(data['0']):
             log.warning(f'Asker is not at the table. Delete:{cases.del_msg(log, bot, cid, mid)}')
             return
