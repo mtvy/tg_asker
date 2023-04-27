@@ -77,23 +77,26 @@ def get_asks(log, bot: TeleBot, tid: str|int) -> None:
         return
     
     send_msg(log, bot, tid, f'Всего опросов: {len(data)}', rmvKb())
+    sorted_asks = sorted(list(data.values()), key=lambda x: x)
     asks = formatListedAsk(data)
-    for key, ask in zip(data.keys(), asks):
-        if data[key][5]:
+    log.debug(sorted_asks)
+    log.debug(asks)
+    for srtd_ask, ask in zip(sorted_asks, asks):
+        if srtd_ask[5]:
             send_msg(log, bot, tid, ask, get_ikb(log, 
                 {
-                    'Отправить': f'{SENDFLAG}{data[key][0]}',
-                    # 'Остановить': f'{STOPFLAG}{data[key][0]}',
-                    'Удалить': f'{DELFLAG}{data[key][0]}',
-                    # 'Результаты': f'{RESFLAG}{data[key][0]}',
+                    'Отправить': f'{SENDFLAG}{srtd_ask[0]}',
+                    # 'Остановить': f'{STOPFLAG}{srtd_ask[0]}',
+                    'Удалить': f'{DELFLAG}{srtd_ask[0]}',
+                    # 'Результаты': f'{RESFLAG}{srtd_ask[0]}',
                 }
             ))
         else:
             send_msg(log, bot, tid, ask, get_ikb(log, 
                 {
-                    'Отправить': f'{SENDFLAG}{data[key][0]}',
-                    'Удалить': f'{DELFLAG}{data[key][0]}',
-                    # 'Результаты': f'{RESFLAG}{data[key][0]}',
+                    'Отправить': f'{SENDFLAG}{srtd_ask[0]}',
+                    'Удалить': f'{DELFLAG}{srtd_ask[0]}',
+                    # 'Результаты': f'{RESFLAG}{srtd_ask[0]}',
                 }
             ))
     
@@ -296,7 +299,7 @@ def redirect(log, bot: TeleBot, tid: str|int, dev: str|int, aid: str, cid: str|i
     
     def _redirect(msg: Message, log, bot: TeleBot, tid: str|int, cid: str, data: str) -> None:
         txt = msg.text
-        log.info(f'Redirecting by tid:{tid} with data:{data} link:{txt} to cid:{cid}')
+        log.info(f'Redirecting by tid:{tid} link:{txt} to cid:{cid}')
         if TGLINK not in txt:
             log.debug(f"Wrong link:'{txt}' format.")
             send_msg(log, bot, tid, f'Неправильный формат ссылки ({TGLINK})', get_kb(log, DEFALTKB))
