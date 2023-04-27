@@ -96,7 +96,7 @@ def send_doc(log, bot: TeleBot, tid: str|int, txt: str, doc: str, mrkp=None) -> 
 
 def send_photo(log, bot: TeleBot, tid: str|int, txt: str, photo: bytes, mrkp=None) -> Message:
     try:
-        log.debug(f"Photo:'{photo}' Msg:'{txt}' Dest:{tid}")
+        log.debug(f"Msg:'{txt}' Dest:{tid}")
         return bot.send_photo(tid, photo, txt, reply_markup=mrkp)
     except Exception as err:
         log.error(f'{err}')
