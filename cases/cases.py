@@ -550,7 +550,7 @@ def handle(log, bot: TeleBot, cid: int|str, mid: int|str, rid: int|str) -> None:
 
     log.debug(f"Enter handler: mid:{mid} cid:{cid} rid:{rid}")
     time.sleep(5)
-    if results[mid].is_active and results[mid].rid == rid:
+    if results[mid].is_active:
         del_msg(log, bot, cid, rid)
         results[mid].off()
         log.debug("Del")

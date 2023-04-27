@@ -88,7 +88,7 @@ def del_msg(log, bot: TeleBot, cid: str|int, mid: int) -> bool:
 
 def send_doc(log, bot: TeleBot, tid: str|int, txt: str, doc: str, mrkp=None) -> Message:
     try:
-        log.debug(f"Doc:'{doc}' Msg:'{txt}' Dest:{tid}")
+        log.debug(f"Doc:'{len(doc)}' Msg:'{txt}' Dest:{tid}")
         return bot.send_document(tid, io.open(doc), caption=txt, reply_markup=mrkp)
     except Exception as err:
         log.error(f'{err}')
