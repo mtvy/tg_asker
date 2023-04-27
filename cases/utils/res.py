@@ -14,6 +14,9 @@ class Result:
         self.is_active = is_active
         self.init_time = now
         self.rid = rid
+    
+    def off(self) -> None:
+        self.is_active = False
 
 
 # Singleton

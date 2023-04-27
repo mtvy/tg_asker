@@ -2,6 +2,7 @@ from .utils import (
     send_photo,
     send_msg,
     wait_msg,
+    del_msg,
 
     get_kb,
     get_ikb,
@@ -23,7 +24,7 @@ from telethon import (
 from typing import List
 from telebot import TeleBot
 from datetime import datetime
-import asyncio, json, os, emoji, base64
+import asyncio, json, os, emoji, base64, time
 
 TGLINK = 'https://t.me/'
 ADDKB = ['Канал/Чат', 'Опрос']
@@ -542,3 +543,16 @@ def formatRes(data) -> str:
         """
     return chats
 
+    
+exc = False
+def handle(log, bot: TeleBot, cid: int|str, mid: int|str, rid: int|str) -> None:
+    global results
+
+    log.debug(f"Enter handler: mid:{mid} cid:{cid} rid:{rid}")
+    time.sleep(5)
+    if results[mid].is_active and results[mid].rid == rid:
+        del_msg(log, bot, cid, rid)
+        results[mid].off()
+        log.debug("Del")
+        return
+    log.debug("Skip")

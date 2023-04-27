@@ -236,6 +236,10 @@ def callback_inline(call: CallbackQuery):
                     msg = cases.send_photo(log, bot, cid, f"Результаты опроса:\n{adata['0'][1]}", cases.get_base64_graph(log, "", vals, subs))
                     cases.results[mid].set_result(msg.message_id, True, datetime.now())
                     log.debug(f"init new res: mid:{mid} rid:{msg.message_id}")
+                    
+                    log.debug(f"Init handler: cid:{cid} rid:{msg.message_id}")
+                    proc = cases.init_proc(cases.handle, [log, bot, cid, mid, msg.message_id])
+                    cases.start_proc(proc)
                 except Exception as err:
                     log.error(err)
                 return
@@ -245,6 +249,10 @@ def callback_inline(call: CallbackQuery):
             
             cases.results[mid].set_result(msg.message_id, True, datetime.now())
             log.debug(f"init new res: mid:{mid} rid:{msg.message_id}")
+
+            log.debug(f"Init handler: cid:{cid} rid:{msg.message_id}")
+            proc = cases.init_proc(cases.handle, [log, bot, cid, mid, msg.message_id])
+            cases.start_proc(proc)
 
         return
     
