@@ -307,7 +307,7 @@ def redirect(log, bot: TeleBot, tid: str|int, dev: str|int, aid: str, cid: str|i
         loop.run_until_complete(task)
 
         chat = task.result()
-        log.debug(chat)
+        # log.debug(chat)
 
         if not hasattr(chat, 'id'):
             log.debug(f'No id chat:{chat}')
