@@ -470,7 +470,7 @@ def formatAsk(data) -> str:
             res = f"""{res}
             Всего голосов: {sum_votes}
             Больше всего голосов: {max_votes} у {max_votes_ask}
-            В процентах: {round(max_votes/sum_votes * 100, 1)}
+            В процентах: {0 if sum_votes==0 else round(max_votes/sum_votes * 100, 1)}%
             """
         asks = f"""{asks}
     {int(ind)+1})
