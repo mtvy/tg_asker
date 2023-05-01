@@ -94,6 +94,7 @@ def callback_inline(call: CallbackQuery):
 
     if cases.SENDFLAG in data:
         data = data.replace(cases.SENDFLAG, '')
+        log.debug(data)
         cases.redirect(log, bot, uid, dev, data, cid, name, api_id, api_hash, photo)
         return
     

@@ -277,8 +277,9 @@ def send(log, bot: TeleBot, tid: str|int) -> None:
     
     send_msg(log, bot, tid, f'Всего опросов: {len(data)}', rmvKb())
     asks = formatListedAsk(data)
-    for key, ask in zip(data.keys(), asks):
-        send_msg(log, bot, tid, ask, get_ikb(log, {'Отправить': f'{SENDFLAG}{data[key][0]}'}))
+    sorted_asks = sorted(list(data.values()), key=lambda x: x)
+    for srtd_ask, ask in zip(sorted_asks, asks):
+        send_msg(log, bot, tid, ask, get_ikb(log, {'Отправить': f'{SENDFLAG}{srtd_ask[0]}'}))
     
     send_msg(log, bot, tid, f'Какой отправить?', get_kb(log, ['Создать новый опрос', 'Назад']))
     
