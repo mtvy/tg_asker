@@ -172,6 +172,7 @@ def callback_inline(call: CallbackQuery):
                 cases.send_msg(log, bot, uid, 'Ошибка получения опроса.', rmvKb())
                 return
             atitle = adata['0'][1]
+            atitle = f"{atitle}\n{'Опрос без результата' if not adata['0'][7] else 'Опрос публичный' if adata['0'][6] else 'Опрос анонимный'}"
             votes = []; svotes = 0
             if adata['0'][4]:
                 for k, r in adata['0'][4].items():
@@ -239,7 +240,7 @@ def callback_inline(call: CallbackQuery):
                     log.debug(f"edit_message_caption cid:{cid} res.rid:{cases.results[mid].rid}")
                     vals, subs = cases.get_vals_n_subs(log, adata['0'])
                     log.debug(f'Delta of res time > 10s del_res:{cases.del_msg(log, bot, cid, cases.results[mid].rid)}')
-                    msg = cases.send_photo(log, bot, cid, f"Результаты опроса:\n{adata['0'][1]}", cases.get_base64_graph(log, "", vals, subs))
+                    msg = cases.send_photo(log, bot, cid, f"Результаты опроса:\n{adata['0'][1]}\n{'' if not adata['0'][6] else cases.format_listed_res(adata['0'])}", cases.get_base64_graph(log, "", vals, subs))
                     cases.results[mid].set_result(msg.message_id, True, datetime.now())
                     log.debug(f"init new res: mid:{mid} rid:{msg.message_id}")
                     
@@ -251,7 +252,7 @@ def callback_inline(call: CallbackQuery):
                 return
 
             vals, subs = cases.get_vals_n_subs(log, adata['0'])
-            msg = cases.send_photo(log, bot, cid, f"Результаты опроса:\n{adata['0'][1]}", cases.get_base64_graph(log, "", vals, subs))
+            msg = cases.send_photo(log, bot, cid, f"Результаты опроса:\n{adata['0'][1]}\n{'' if not adata['0'][6] or not adata['0'][7] else cases.format_listed_res(adata['0'])}", cases.get_base64_graph(log, "", vals, subs))
             
             cases.results[mid].set_result(msg.message_id, True, datetime.now())
             log.debug(f"init new res: mid:{mid} rid:{msg.message_id}")

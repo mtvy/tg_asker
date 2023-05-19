@@ -111,6 +111,7 @@ def push(log, bot: TeleBot, tid: str|int, cid, adata, photo: bytes, chat) -> Non
         return
         
     atitle = adata['0'][1]
+    atitle = f"{atitle}\n{'Опрос без результата' if not adata['0'][7] else 'Опрос публичный' if adata['0'][6] else 'Опрос анонимный'}"
     log.debug(atitle)
     abtns, jsonb = dict(), dict()
     for i in adata['0'][2]['Elements']:
